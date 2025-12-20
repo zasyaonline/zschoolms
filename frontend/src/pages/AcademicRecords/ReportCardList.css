@@ -1,0 +1,545 @@
+.report-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 1092px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* Title Section */
+.report-cards__title-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.report-cards__title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 31px;
+  line-height: 1.2;
+  color: #1F55A6;
+  margin: 0;
+}
+
+/* Card Container */
+.report-cards__card {
+  background: #FFFFFF;
+  border: 0.5px solid rgba(31, 85, 166, 0.2);
+  border-radius: 16px;
+  box-shadow: 0px 4px 20px 0px rgba(238, 238, 238, 0.5);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Controls Section */
+.report-cards__controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 12px;
+}
+
+/* Search */
+.report-cards__search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  width: 300px;
+  height: 35.78px;
+  border: 1px solid #707070;
+  border-radius: 8px;
+}
+
+.report-cards__search-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.report-cards__search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 24px;
+  color: #8D8D8D;
+  background: transparent;
+}
+
+.report-cards__search-input::placeholder {
+  color: #8D8D8D;
+}
+
+/* Action Buttons */
+.report-cards__action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.report-cards__filter-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 35.78px;
+  border: 1px solid #707070;
+  border-radius: 8px;
+  background: #FFFFFF;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.2s;
+}
+
+.report-cards__filter-btn:hover {
+  background: rgba(112, 112, 112, 0.05);
+}
+
+.report-cards__filter-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.report-cards__view-pdf-btn {
+  padding: 8.889px 12.444px;
+  border: 1px solid #1F55A6;
+  border-radius: 10px;
+  background: #FFFFFF;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 12.444px;
+  line-height: 17.778px;
+  color: #1F55A6;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.report-cards__view-pdf-btn:hover {
+  background: rgba(31, 85, 166, 0.05);
+}
+
+.report-cards__bulk-generate-btn {
+  padding: 8.889px 12.444px;
+  border: none;
+  border-radius: 10px;
+  background: #1F55A6;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 12.444px;
+  line-height: 17.778px;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.report-cards__bulk-generate-btn:hover {
+  background: #174488;
+}
+
+/* Table */
+.report-cards__table {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Table Header */
+.report-cards__table-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: linear-gradient(140.31deg, #D9E8FF 140.31%, #FFFFFF 100%);
+  border: 1px solid #CADFFF;
+  border-radius: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #425166;
+}
+
+.report-cards__header-cell {
+  flex: 1;
+  min-width: 0;
+}
+
+.report-cards__header-cell--name {
+  width: 250px;
+  flex: none;
+}
+
+.report-cards__header-cell--actions {
+  width: 132px;
+  flex: none;
+}
+
+/* Table Body */
+.report-cards__table-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background: #FAFCFF;
+  border-radius: 12px;
+}
+
+/* Table Row */
+.report-cards__table-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.report-cards__cell {
+  flex: 1;
+  min-width: 0;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #333;
+}
+
+.report-cards__cell--name {
+  width: 250px;
+  flex: none;
+}
+
+.report-cards__cell--actions {
+  width: 132px;
+  flex: none;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Divider */
+.report-cards__divider {
+  height: 0;
+  border-bottom: 1px solid #E5E5E5;
+  width: 100%;
+}
+
+/* Action Button */
+.report-cards__action-btn {
+  padding: 7px 12px;
+  height: 32px;
+  border-radius: 6px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  border: none;
+}
+
+.report-cards__action-btn--generate {
+  background: #1F55A6;
+  border: 1px solid #1F55A6;
+  color: #FFFFFF;
+}
+
+.report-cards__action-btn--generate:hover {
+  background: #174488;
+}
+
+/* Status Badge */
+.report-cards__status-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 12px;
+  height: 32px;
+  background: rgba(14, 204, 103, 0.05);
+  border: 1px solid #0ECC67;
+  border-radius: 6px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #0ECC67;
+  white-space: nowrap;
+}
+
+/* Footer */
+.report-cards__footer {
+  display: flex;
+  gap: 24px;
+  padding: 0 12px;
+}
+
+.report-cards__footer-link {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #333;
+  text-decoration: underline;
+  text-underline-position: from-font;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.report-cards__footer-link:hover {
+  color: #1F55A6;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .report-cards {
+    max-width: 100%;
+    padding: 0 16px;
+  }
+
+  .report-cards__controls {
+    flex-wrap: wrap;
+  }
+
+  .report-cards__search {
+    width: 100%;
+  }
+
+  .report-cards__action-buttons {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 768px) {
+  .report-cards__title {
+    font-size: 24px;
+  }
+
+  .report-cards__table-header,
+  .report-cards__table-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .report-cards__header-cell,
+  .report-cards__cell {
+    width: 100% !important;
+    flex: none;
+  }
+
+  .report-cards__cell--actions {
+    justify-content: flex-start;
+  }
+
+  .report-cards__action-buttons {
+    flex-wrap: wrap;
+  }
+
+  .report-cards__view-pdf-btn,
+  .report-cards__bulk-generate-btn {
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+}
+
+/* Modal Overlay */
+.report-cards__modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(51, 51, 51, 0.3);
+  backdrop-filter: blur(7px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+/* Modal Container */
+.report-cards__modal {
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 24px;
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow: 0px 8px 40px rgba(0, 0, 0, 0.15);
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Modal Header */
+.report-cards__modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.report-cards__modal-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.2;
+  color: #010101;
+  margin: 0;
+  text-align: center;
+  width: 100%;
+}
+
+/* Modal Divider */
+.report-cards__modal-divider {
+  height: 0;
+  border-bottom: 1px solid #E5E5E5;
+  width: 100%;
+}
+
+/* Modal Content */
+.report-cards__modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Modal Field */
+.report-cards__modal-field {
+  position: relative;
+  height: 74px;
+  width: 100%;
+}
+
+.report-cards__modal-label {
+  position: absolute;
+  top: 0;
+  left: 12px;
+  background: #FFFFFF;
+  padding: 0 4px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 16px;
+  color: #1F55A6;
+  z-index: 1;
+}
+
+.report-cards__modal-select-wrapper {
+  position: relative;
+  margin-top: 7px;
+  height: 48px;
+}
+
+.report-cards__modal-select {
+  width: 100%;
+  height: 48px;
+  padding: 0 40px 0 16px;
+  border: 1px solid #1F55A6;
+  border-radius: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #1F55A6;
+  background: #FFFFFF;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.report-cards__modal-select:focus {
+  border-color: #1F55A6;
+}
+
+.report-cards__modal-select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+}
+
+/* Modal Actions */
+.report-cards__modal-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.report-cards__modal-btn {
+  flex: 1;
+  height: 50px;
+  padding: 16px 8px;
+  border-radius: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: normal;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.report-cards__modal-btn--generate {
+  background: #1F55A6;
+  color: #FFFFFF;
+}
+
+.report-cards__modal-btn--generate:hover {
+  background: #174488;
+}
+
+.report-cards__modal-btn--cancel {
+  background: #FFFFFF;
+  border: 1px solid #1F55A6;
+  color: #1F55A6;
+}
+
+.report-cards__modal-btn--cancel:hover {
+  background: rgba(31, 85, 166, 0.05);
+}
+
+/* Modal Responsive */
+@media (max-width: 768px) {
+  .report-cards__modal {
+    max-width: 100%;
+    padding: 20px;
+  }
+
+  .report-cards__modal-title {
+    font-size: 18px;
+  }
+
+  .report-cards__modal-btn {
+    font-size: 16px;
+    height: 44px;
+    padding: 12px 8px;
+  }
+}

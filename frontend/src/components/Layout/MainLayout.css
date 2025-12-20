@@ -1,0 +1,111 @@
+/* ============================================
+   Main Layout Styles
+   ============================================ */
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-white);
+  padding: 10px;
+  gap: 0;
+}
+
+.layout__sidebar {
+  flex-shrink: 0;
+}
+
+.layout__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-white);
+  border-radius: var(--radius-3xl);
+  overflow: hidden;
+  margin-left: -10px;
+}
+
+.layout__content {
+  flex: 1;
+  padding: var(--spacing-2xl);
+  overflow-y: auto;
+  background: var(--bg-white);
+}
+
+/* Page Title */
+.page-title {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-2xl);
+  color: var(--primary-color);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--spacing-2xl);
+}
+
+/* Card Container */
+.card {
+  background: var(--bg-white);
+  border: 0.5px solid var(--primary-border);
+  border-radius: var(--radius-2xl);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.card__title {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+}
+
+/* Footer Links */
+.footer-links {
+  display: flex;
+  gap: var(--spacing-2xl);
+  padding: 0 var(--spacing-md);
+  margin-top: var(--spacing-2xl);
+}
+
+.footer-link {
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.footer-link:hover {
+  color: var(--primary-color);
+}
+
+/* Responsive */
+@media screen and (max-width: 1200px) {
+  .layout {
+    padding: 8px;
+  }
+  
+  .layout__content {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+    padding: 0;
+  }
+  
+  .layout__sidebar {
+    width: 100%;
+  }
+  
+  .layout__main {
+    margin-left: 0;
+    border-radius: 0;
+  }
+}

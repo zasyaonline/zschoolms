@@ -1,0 +1,409 @@
+/* Marks Review Page */
+.marks-review {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+}
+
+/* Header */
+.marks-review__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.marks-review__title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 31px;
+  line-height: 1.2;
+  color: #1F55A6;
+  margin: 0;
+}
+
+/* Student Select Dropdown */
+.marks-review__student-select {
+  position: relative;
+  width: 400px;
+}
+
+.marks-review__student-select-label {
+  position: absolute;
+  top: 0;
+  left: 16px;
+  background: #FFFFFF;
+  padding: 0 4px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 16px;
+  color: #1F55A6;
+  z-index: 1;
+}
+
+.marks-review__student-select-wrapper {
+  position: relative;
+  margin-top: 7px;
+}
+
+.marks-review__student-select-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 40px 0 16px;
+  border: 1px solid #1F55A6;
+  border-radius: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #1F55A6;
+  background: #FFFFFF;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.marks-review__student-select-input:focus {
+  border-color: #1F55A6;
+  box-shadow: 0 0 0 2px rgba(31, 85, 166, 0.1);
+}
+
+.marks-review__student-select-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Card */
+.marks-review__card {
+  background: #FFFFFF;
+  border: 0.5px solid rgba(31, 85, 166, 0.2);
+  border-radius: 16px;
+  box-shadow: 0px 4px 20px 0px rgba(238, 238, 238, 0.5);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.marks-review__card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.marks-review__card-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.2;
+  color: #010101;
+  margin: 0;
+}
+
+.marks-review__card-subtitle {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #333;
+  margin: 0;
+}
+
+.marks-review__divider {
+  height: 1px;
+  background: rgba(31, 85, 166, 0.2);
+  width: 100%;
+}
+
+/* Student Information */
+.marks-review__student-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.marks-review__info-row {
+  display: flex;
+  gap: 12px;
+}
+
+.marks-review__info-field {
+  flex: 1;
+  background: rgba(217, 232, 255, 0.2);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 68px;
+  justify-content: center;
+}
+
+.marks-review__info-label {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 16px;
+  color: #8D8D8D;
+}
+
+.marks-review__info-value {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #1F55A6;
+}
+
+/* Subject Marks */
+.marks-review__subjects {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.marks-review__subjects-header {
+  background: linear-gradient(140.31deg, #D9E8FF 140.31%, #FFFFFF 100%);
+  border: 1px solid #CADFFF;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  gap: 12px;
+}
+
+.marks-review__subject-header-cell {
+  flex: 1;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #425166;
+}
+
+.marks-review__subjects-body {
+  background: #FAFCFF;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.marks-review__subjects-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.marks-review__subject-cell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.marks-review__subject-marks {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #333;
+}
+
+/* Custom Checkbox */
+.marks-review__checkbox {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.marks-review__checkbox input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  width: 0;
+  height: 0;
+}
+
+.marks-review__checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid #8D8D8D;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.marks-review__checkbox input[type="checkbox"]:checked + .marks-review__checkbox-custom {
+  background: #FFFFFF;
+  border-color: #1F55A6;
+}
+
+.marks-review__checkbox:hover .marks-review__checkbox-custom {
+  border-color: #1F55A6;
+}
+
+/* Comments */
+.marks-review__comments {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.marks-review__comment {
+  background: rgba(217, 232, 255, 0.2);
+  border: 1px solid #CADFFF;
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 143.778px;
+  justify-content: center;
+}
+
+.marks-review__comment-author {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 16px;
+  color: #8D8D8D;
+}
+
+.marks-review__comment-text {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #1F55A6;
+  margin: 0;
+}
+
+.marks-review__add-comment-btn {
+  background: #FFFFFF;
+  border: 1px solid #1F55A6;
+  border-radius: 10px;
+  padding: 8.889px 12.444px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 12.444px;
+  line-height: 17.778px;
+  color: #1F55A6;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: fit-content;
+}
+
+.marks-review__add-comment-btn:hover {
+  background: rgba(31, 85, 166, 0.05);
+}
+
+/* Action Buttons */
+.marks-review__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.marks-review__action-btn {
+  height: 50px;
+  border-radius: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: normal;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 16px 80px;
+}
+
+.marks-review__action-btn--approve {
+  background: #1F55A6;
+  color: #FFFFFF;
+  border: none;
+  width: 210px;
+}
+
+.marks-review__action-btn--approve:hover {
+  background: #174489;
+}
+
+.marks-review__action-btn--request {
+  background: #FFFFFF;
+  color: #1F55A6;
+  border: 1px solid #1F55A6;
+  flex: 1;
+}
+
+.marks-review__action-btn--request:hover {
+  background: rgba(31, 85, 166, 0.05);
+}
+
+/* Footer */
+.marks-review__footer {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 12px;
+}
+
+.marks-review__footer-link {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #333;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.marks-review__footer-link:hover {
+  color: #1F55A6;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .marks-review__header {
+    flex-direction: column;
+  }
+
+  .marks-review__student-select {
+    width: 100%;
+  }
+
+  .marks-review__subjects-header,
+  .marks-review__subjects-row {
+    overflow-x: auto;
+  }
+
+  .marks-review__subject-header-cell,
+  .marks-review__subject-cell {
+    min-width: 100px;
+  }
+}
+
+@media (max-width: 768px) {
+  .marks-review__title {
+    font-size: 24px;
+  }
+
+  .marks-review__info-row {
+    flex-direction: column;
+  }
+
+  .marks-review__actions {
+    flex-direction: column;
+  }
+
+  .marks-review__action-btn {
+    width: 100% !important;
+  }
+
+  .marks-review__action-btn--approve {
+    width: 100% !important;
+  }
+}

@@ -1,0 +1,99 @@
+/* ============================================
+   ZASYA School Management System
+   Design System Variables
+   ============================================ */
+
+:root {
+  /* Primary Colors */
+  --primary-color: #1F55A6;
+  --primary-dark: #164489;
+  --primary-light: #D9E8FF;
+  --primary-bg: rgba(31, 85, 166, 0.05);
+  --primary-border: rgba(31, 85, 166, 0.2);
+
+  /* Black/Neutral Colors */
+  --black-b0: #FFFFFF;
+  --black-b90: #8D8D8D;
+  --black-b200: #707070;
+  --black-b500: #484848;
+  --black-b900: #010101;
+  
+  /* Text Colors */
+  --text-primary: #333333;
+  --text-secondary: #425166;
+  --text-muted: #A3B6CC;
+  --text-helper: #5E6368;
+  --text-dark-blue: #294566;
+  
+  /* Background Colors */
+  --bg-white: #FFFFFF;
+  --bg-light: #FAFCFF;
+  --bg-sidebar: #1F55A6;
+  --bg-gradient: linear-gradient(to right, #FFFFFF 0%, #D9E8FF 140.31%);
+  
+  /* Border Colors */
+  --border-light: #F0F0F0;
+  --border-medium: #707070;
+  --border-blue: #CADFFF;
+  
+  /* Shadow */
+  --shadow-card: 0px 4px 20px 0px rgba(238, 238, 238, 0.5);
+  
+  /* Typography - Font Families */
+  --font-primary: 'Poppins', sans-serif;
+  --font-secondary: 'Montserrat', sans-serif;
+  --font-inter: 'Inter', sans-serif;
+  
+  /* Typography - Font Sizes */
+  --font-size-xs: 10px;
+  --font-size-sm: 12px;
+  --font-size-md: 13px;
+  --font-size-base: 16px;
+  --font-size-lg: 20px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 31px;
+  
+  /* Typography - Font Weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Typography - Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.4;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
+  
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 20px;
+  --radius-full: 30px;
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Layout */
+  --sidebar-width: 220px;
+  --header-height: 60px;
+  --content-max-width: 1140px;
+}
+
+/* Dark Theme (optional for future) */
+[data-theme="dark"] {
+  --bg-white: #1a1a2e;
+  --bg-light: #16213e;
+  --text-primary: #e8e8e8;
+}

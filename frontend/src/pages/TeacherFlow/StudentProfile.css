@@ -1,0 +1,676 @@
+/* Main Container - hidden by default, shown after header */
+.student-profile {
+  width: 100%;
+  max-width: 1092px;
+  margin: 0 auto;
+  padding: 24px 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Hidden Title (not visible in Figma design) */
+.student-profile__title {
+  display: none;
+}
+
+/* Tabs Navigation */
+.student-profile__tabs {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.student-profile__tab {
+  padding: 16px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid #C4C4C4;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.2;
+  color: #8D8D8D;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.student-profile__tab--active {
+  border-bottom: 2px solid #1F55A6;
+  color: #1F55A6;
+}
+
+.student-profile__tab-spacer {
+  flex: 1;
+  border-bottom: 1px solid #C4C4C4;
+  height: 56px;
+}
+
+/* Content Area */
+.student-profile__content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Card Component */
+.student-profile__card {
+  background: #FFFFFF;
+  border: 0.5px solid rgba(31, 85, 166, 0.2);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0px 4px 20px 0px rgba(238, 238, 238, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.student-profile__card-title {
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.2;
+  color: #010101;
+  margin: 0;
+  text-align: center;
+}
+
+.student-profile__divider {
+  width: 100%;
+  height: 0;
+  border-bottom: 1px solid #E5E5E5;
+}
+
+/* Profile Header with Avatar */
+.student-profile__profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.student-profile__avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 30px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.student-profile__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.student-profile__profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.student-profile__name {
+  font-weight: 700;
+  font-size: 25px;
+  line-height: 1.2;
+  color: #1F55A6;
+  margin: 0;
+}
+
+/* Student Details */
+.student-profile__details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.student-profile__field-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.student-profile__field {
+  background: rgba(217, 232, 255, 0.2);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-height: 68px;
+  justify-content: center;
+}
+
+.student-profile__field--full {
+  width: 100%;
+}
+
+.student-profile__label {
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 16px;
+  color: #8D8D8D;
+}
+
+.student-profile__value {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #1F55A6;
+  margin: 0;
+}
+
+/* Help Links */
+.student-profile__help-links {
+  display: flex;
+  gap: 24px;
+  padding: 12px;
+  align-items: flex-start;
+}
+
+.student-profile__help-link {
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #333;
+  text-decoration: underline;
+  text-underline-position: from-font;
+  cursor: pointer;
+}
+
+.student-profile__help-link:hover {
+  color: #1F55A6;
+}
+
+/* Placeholder for empty tabs */
+.student-profile__placeholder {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #8D8D8D;
+  text-align: center;
+  padding: 40px 0;
+  margin: 0;
+}
+
+/* Attendance Summary Styles */
+.student-profile__attendance-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.student-profile__date-selectors {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.student-profile__month-selector,
+.student-profile__year-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  height: 35.78px;
+  border: 1px solid #1F55A6;
+  border-radius: 8px;
+}
+
+.student-profile__arrow-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+}
+
+.student-profile__arrow-btn:hover {
+  opacity: 0.7;
+}
+
+.student-profile__month-text,
+.student-profile__year-text {
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 24px;
+  color: #1F55A6;
+}
+
+.student-profile__attendance-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.student-profile__attendance-rate,
+.student-profile__present-days {
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.2;
+  color: #1F55A6;
+  margin: 0;
+}
+
+/* Calendar Grid */
+.student-profile__calendar {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.student-profile__calendar-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: #FFFFFF;
+}
+
+.student-profile__calendar-day-name {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.2;
+  color: #565656;
+  border: 0.2px solid #7E7E7E;
+}
+
+.student-profile__calendar-day-name:first-child {
+  border-top-left-radius: 12px;
+}
+
+.student-profile__calendar-day-name:last-child {
+  border-top-right-radius: 12px;
+}
+
+.student-profile__calendar-body {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.student-profile__calendar-day {
+  padding: 12px 16px;
+  height: 100px;
+  text-align: left;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.2;
+  color: #565656;
+  border: 0.2px solid #7E7E7E;
+  background: #FFFFFF;
+}
+
+.student-profile__calendar-day--present {
+  background: rgba(14, 204, 103, 0.1);
+}
+
+.student-profile__calendar-day--absent {
+  background: rgba(224, 0, 0, 0.1);
+}
+
+.student-profile__calendar-day--empty {
+  background: #FAFAFA;
+  color: #C4C4C4;
+}
+
+/* Bottom-left corner */
+.student-profile__calendar-day:nth-last-child(7) {
+  border-bottom-left-radius: 12px;
+}
+
+/* Bottom-right corner */
+.student-profile__calendar-day:last-child {
+  border-bottom-right-radius: 12px;
+}
+
+/* Responsive Design */
+
+/* Tablet */
+@media (max-width: 1200px) {
+  .student-profile {
+    max-width: 900px;
+    padding: 20px;
+  }
+
+  .student-profile__field-row {
+    flex-direction: column;
+  }
+
+  .student-profile__field {
+    width: 100%;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .student-profile {
+    padding: 16px;
+  }
+
+  .student-profile__tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .student-profile__tab {
+    font-size: 16px;
+    padding: 12px;
+    white-space: nowrap;
+  }
+
+  .student-profile__tab-spacer {
+    min-width: 50px;
+  }
+
+  .student-profile__card {
+    padding: 12px;
+  }
+
+  .student-profile__card-title {
+    font-size: 18px;
+  }
+
+  .student-profile__name {
+    font-size: 20px;
+  }
+
+  .student-profile__profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .student-profile__avatar {
+    width: 50px;
+    height: 50px;
+  }
+
+  .student-profile__help-links {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Attendance Mobile Styles */
+  .student-profile__attendance-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .student-profile__attendance-stats {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .student-profile__attendance-rate,
+  .student-profile__present-days {
+    font-size: 16px;
+  }
+
+  .student-profile__calendar-day-name {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .student-profile__calendar-day {
+    font-size: 16px;
+    padding: 10px 12px;
+    height: 80px;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .student-profile {
+    padding: 12px;
+  }
+
+  .student-profile__tab {
+    font-size: 14px;
+    padding: 10px 8px;
+  }
+
+  .student-profile__card {
+    padding: 8px;
+  }
+
+  .student-profile__field {
+    padding: 10px 12px;
+    min-height: 60px;
+  }
+
+  .student-profile__label {
+    font-size: 12px;
+  }
+
+  .student-profile__value {
+    font-size: 14px;
+  }
+
+  /* Attendance Small Mobile Styles */
+  .student-profile__date-selectors {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .student-profile__month-selector,
+  .student-profile__year-selector {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .student-profile__attendance-rate,
+  .student-profile__present-days {
+    font-size: 14px;
+  }
+
+  .student-profile__calendar-day-name {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+
+  .student-profile__calendar-day {
+    font-size: 14px;
+    padding: 8px;
+    height: 60px;
+  }
+}
+
+/* Marks History Tab Styles */
+.student-profile__marks-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.student-profile__filter-field {
+  position: relative;
+  width: 250px;
+}
+
+.student-profile__filter-label {
+  position: absolute;
+  top: 8px;
+  left: 16px;
+  font-size: 13px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  color: #1F55A6;
+  background-color: white;
+  padding: 0 4px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.student-profile__filter-select {
+  width: 100%;
+  height: 48px;
+  margin-top: 13px;
+  padding: 0 40px 0 16px;
+  border: 1px solid #1F55A6;
+  border-radius: 12px;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  color: #1F55A6;
+  background-color: white;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.student-profile__filter-select:focus {
+  border-color: #1F55A6;
+  box-shadow: 0 0 0 2px rgba(31, 85, 166, 0.1);
+}
+
+.student-profile__filter-dropdown-icon {
+  position: absolute;
+  right: 12px;
+  top: calc(50% + 6px);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Marks Table */
+.student-profile__marks-table-wrapper {
+  margin-top: 24px;
+}
+
+.student-profile__marks-table-header {
+  display: flex;
+  background: linear-gradient(140.31deg, #D9E8FF 0%, #FFFFFF 100%);
+  border: 1px solid #CADFFF;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.student-profile__marks-header-cell {
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  color: #425166;
+}
+
+.student-profile__marks-header-cell--subject {
+  flex: 1;
+  text-align: left;
+}
+
+.student-profile__marks-header-cell--theory {
+  flex: 1;
+  text-align: center;
+}
+
+.student-profile__marks-header-cell--total {
+  flex: 1;
+  text-align: center;
+}
+
+.student-profile__marks-table-body {
+  margin-top: 12px;
+}
+
+.student-profile__marks-row {
+  display: flex;
+  background-color: #FAFCFF;
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.student-profile__marks-row--total {
+  background-color: transparent;
+  margin-bottom: 0;
+}
+
+.student-profile__marks-cell {
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  color: #333;
+}
+
+.student-profile__marks-cell--subject {
+  flex: 1;
+  text-align: left;
+}
+
+.student-profile__marks-cell--theory {
+  flex: 1;
+  text-align: center;
+}
+
+.student-profile__marks-cell--total {
+  flex: 1;
+  text-align: center;
+}
+
+.student-profile__marks-total-value {
+  font-weight: 700;
+  color: #1F55A6;
+}
+
+.student-profile__marks-divider {
+  height: 1px;
+  background-color: #E5E5E5;
+  margin: 12px 0;
+}
+
+/* Marks Actions */
+.student-profile__marks-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.student-profile__marks-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 50px;
+  padding: 16px 40px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.student-profile__marks-btn--primary {
+  background-color: #1F55A6;
+  color: white;
+  border: none;
+}
+
+.student-profile__marks-btn--primary:hover {
+  background-color: #174382;
+}
+
+.student-profile__marks-btn--secondary {
+  background-color: white;
+  color: #1F55A6;
+  border: 1px solid #1F55A6;
+}
+
+.student-profile__marks-btn--secondary:hover {
+  background-color: #F5F9FF;
+}
+
+.student-profile__marks-btn--secondary svg {
+  width: 24px;
+  height: 24px;
+}
+

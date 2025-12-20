@@ -1,0 +1,593 @@
+/* ============================================
+   Send Bulk Email Page Styles
+   ============================================ */
+
+.bulk-email {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  max-width: 800px;
+}
+
+/* Header */
+.bulk-email__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.bulk-email__back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-medium);
+  background: var(--bg-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.bulk-email__back-btn:hover {
+  background: var(--bg-light);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.bulk-email__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.bulk-email__subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: var(--spacing-xs) 0 0;
+}
+
+/* Steps */
+.bulk-email__steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: var(--bg-white);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.bulk-email__step {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.bulk-email__step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-light);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.bulk-email__step--active .bulk-email__step-number {
+  background: var(--primary-color);
+  color: var(--bg-white);
+}
+
+.bulk-email__step--completed .bulk-email__step-number {
+  background: #10B981;
+  color: var(--bg-white);
+}
+
+.bulk-email__step-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.bulk-email__step--active .bulk-email__step-label {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.bulk-email__step-line {
+  width: 60px;
+  height: 2px;
+  background: var(--border-light);
+}
+
+/* Card */
+.bulk-email__card {
+  background: var(--bg-white);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.bulk-email__card-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-lg);
+}
+
+/* Filters */
+.bulk-email__filters {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.bulk-email__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.bulk-email__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.bulk-email__select,
+.bulk-email__input {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background: var(--bg-white);
+}
+
+.bulk-email__select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.bulk-email__select:focus,
+.bulk-email__input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+/* Recipient Options */
+.bulk-email__recipient-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.bulk-email__radio-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.bulk-email__radio-option:hover {
+  border-color: var(--primary-color);
+  background: var(--primary-bg);
+}
+
+/* Recipients List */
+.bulk-email__recipients-list {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.bulk-email__list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-light);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.bulk-email__select-all {
+  font-size: var(--font-size-sm);
+  color: var(--primary-color);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.bulk-email__selected-count {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.bulk-email__recipient-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.bulk-email__recipient-item:last-child {
+  border-bottom: none;
+}
+
+.bulk-email__recipient-item--disabled {
+  opacity: 0.5;
+}
+
+.bulk-email__recipient-info {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bulk-email__recipient-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.bulk-email__recipient-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.bulk-email__recipient-student {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.bulk-email__recipient-email {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.bulk-email__no-report {
+  font-size: var(--font-size-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: #FEF3C7;
+  color: #92400E;
+  border-radius: var(--radius-full);
+}
+
+/* Compose */
+.bulk-email__compose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.bulk-email__textarea {
+  width: 100%;
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  color: var(--text-primary);
+  resize: vertical;
+  line-height: var(--line-height-relaxed);
+}
+
+.bulk-email__textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.bulk-email__options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.bulk-email__checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.bulk-email__checkbox-option:hover {
+  border-color: var(--primary-color);
+  background: var(--primary-bg);
+}
+
+.bulk-email__option-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.bulk-email__option-icon {
+  font-size: 20px;
+}
+
+.bulk-email__option-title {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.bulk-email__option-desc {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* Review */
+.bulk-email__review {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: var(--bg-light);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.bulk-email__review-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.bulk-email__review-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.bulk-email__review-value {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+/* Preview */
+.bulk-email__preview {
+  margin-bottom: var(--spacing-lg);
+}
+
+.bulk-email__preview-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  margin: 0 0 var(--spacing-sm);
+}
+
+.bulk-email__preview-content {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.bulk-email__preview-header {
+  padding: var(--spacing-md);
+  background: var(--bg-light);
+  border-bottom: 1px solid var(--border-light);
+  font-size: var(--font-size-sm);
+}
+
+.bulk-email__preview-body {
+  padding: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  line-height: var(--line-height-relaxed);
+}
+
+.bulk-email__preview-attachment {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--bg-light);
+  border-top: 1px solid var(--border-light);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.bulk-email__attachment-icon {
+  font-size: 16px;
+}
+
+/* Warning */
+.bulk-email__warning {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: #FEF3C7;
+  border: 1px solid #F59E0B;
+  border-radius: var(--radius-md);
+  color: #92400E;
+}
+
+.bulk-email__warning p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+/* Sending */
+.bulk-email__card--sending {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-3xl);
+}
+
+.bulk-email__sending-icon {
+  font-size: 64px;
+  margin-bottom: var(--spacing-lg);
+}
+
+.bulk-email__sending-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-sm);
+}
+
+.bulk-email__sending-desc {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  margin: 0 0 var(--spacing-xl);
+}
+
+.bulk-email__progress-bar {
+  width: 100%;
+  max-width: 400px;
+  height: 8px;
+  background: var(--bg-light);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: var(--spacing-sm);
+}
+
+.bulk-email__progress-fill {
+  height: 100%;
+  background: var(--primary-color);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+.bulk-email__progress-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-xl);
+}
+
+.bulk-email__done-btn {
+  padding: var(--spacing-sm) var(--spacing-xl);
+  background: var(--primary-color);
+  color: var(--bg-white);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.bulk-email__done-btn:hover {
+  background: var(--primary-hover);
+}
+
+/* Actions */
+.bulk-email__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+}
+
+.bulk-email__btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-xl);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.bulk-email__btn--secondary {
+  background: var(--bg-white);
+  border: 1px solid var(--border-medium);
+  color: var(--text-secondary);
+}
+
+.bulk-email__btn--secondary:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.bulk-email__btn--primary {
+  background: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  color: var(--bg-white);
+}
+
+.bulk-email__btn--primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.bulk-email__btn--send {
+  background: #10B981;
+  border: 1px solid #10B981;
+  color: var(--bg-white);
+}
+
+.bulk-email__btn--send:hover {
+  background: #059669;
+  border-color: #059669;
+}
+
+.bulk-email__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  .bulk-email__steps {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .bulk-email__step-line {
+    width: 2px;
+    height: 20px;
+  }
+
+  .bulk-email__filters {
+    grid-template-columns: 1fr;
+  }
+
+  .bulk-email__review {
+    grid-template-columns: 1fr;
+  }
+
+  .bulk-email__recipient-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .bulk-email__actions {
+    flex-direction: column;
+  }
+
+  .bulk-email__btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

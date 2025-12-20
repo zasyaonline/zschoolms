@@ -1,0 +1,117 @@
+.error-fallback {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.error-fallback__container {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.error-fallback__icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.error-fallback__title {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.error-fallback__message {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.error-fallback__details {
+  text-align: left;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  cursor: pointer;
+}
+
+.error-fallback__details summary {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 12px;
+}
+
+.error-fallback__error-info {
+  margin-top: 12px;
+}
+
+.error-fallback__error-info p {
+  color: #dc3545;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.error-fallback__stack {
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 12px;
+  font-size: 12px;
+  color: #495057;
+  overflow-x: auto;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.error-fallback__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.error-fallback__button {
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+}
+
+.error-fallback__button--primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.error-fallback__button--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.error-fallback__button--secondary {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.error-fallback__button--secondary:hover {
+  background: #f8f9fa;
+  transform: translateY(-2px);
+}
+
+.error-fallback__button:active {
+  transform: translateY(0);
+}

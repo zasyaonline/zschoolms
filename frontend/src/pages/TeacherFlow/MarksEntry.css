@@ -1,0 +1,575 @@
+/* ===========================
+   Marks Entry - Main Container
+   =========================== */
+.marks-entry {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px 40px 40px;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ===========================
+   Title Section
+   =========================== */
+.marks-entry__title-container {
+  margin-bottom: 24px;
+}
+
+.marks-entry__title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 31px;
+  line-height: 1.2;
+  color: #1F55A6;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===========================
+   Card Container
+   =========================== */
+.marks-entry__card {
+  background: #FFFFFF;
+  border: 1px solid rgba(31, 85, 166, 0.2);
+  border-radius: 16px;
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+/* ===========================
+   Filters Section
+   =========================== */
+.marks-entry__filters {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+  align-items: flex-end;
+}
+
+.marks-entry__field {
+  position: relative;
+  width: 250px;
+  flex-shrink: 0;
+}
+
+.marks-entry__label {
+  position: absolute;
+  top: -8px;
+  left: 12px;
+  background: #FFFFFF;
+  padding: 0 6px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: normal;
+  color: #1F55A6;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.marks-entry__select {
+  width: 100%;
+  height: 48px;
+  padding: 12px 40px 12px 16px;
+  border: 1px solid #1F55A6;
+  border-radius: 12px;
+  background: #FFFFFF;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #333333;
+  cursor: pointer;
+  appearance: none;
+  box-sizing: border-box;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.marks-entry__select:hover {
+  border-color: #1F55A6;
+  box-shadow: 0 0 0 2px rgba(31, 85, 166, 0.1);
+}
+
+.marks-entry__select:focus {
+  border-color: #1F55A6;
+  box-shadow: 0 0 0 3px rgba(31, 85, 166, 0.15);
+}
+
+.marks-entry__dropdown-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ===========================
+   Table Section
+   =========================== */
+.marks-entry__table-wrapper {
+  margin-bottom: 32px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.marks-entry__table {
+  width: 100%;
+  border: 1px solid #CADFFF;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Table Header */
+.marks-entry__table-header {
+  background: linear-gradient(140.31deg, #D9E8FF 0%, #FFFFFF 100%);
+  border-bottom: 1px solid #CADFFF;
+}
+
+.marks-entry__header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  gap: 16px;
+}
+
+.marks-entry__header-left {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+}
+
+.marks-entry__header-text {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #425166;
+}
+
+.marks-entry__header-text:first-child {
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.marks-entry__header-text:nth-child(2) {
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.marks-entry__header-text--right {
+  width: 80px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Table Body */
+.marks-entry__table-body {
+  background: #FAFCFF;
+}
+
+.marks-entry__table-row {
+  padding: 12px 16px;
+}
+
+.marks-entry__row-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.marks-entry__student-info {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+}
+
+.marks-entry__student-id {
+  width: 80px;
+  flex-shrink: 0;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #333333;
+}
+
+.marks-entry__student-name {
+  width: 200px;
+  flex-shrink: 0;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #333333;
+}
+
+.marks-entry__marks-input-wrapper {
+  width: 80px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.marks-entry__marks-input {
+  width: 80px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid #707070;
+  border-radius: 8px;
+  background: #FFFFFF;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #333333;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+/* Remove number input spinner buttons */
+.marks-entry__marks-input::-webkit-outer-spin-button,
+.marks-entry__marks-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.marks-entry__marks-input[type=number] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.marks-entry__marks-input:hover {
+  border-color: #1F55A6;
+}
+
+.marks-entry__marks-input:focus {
+  border-color: #1F55A6;
+  box-shadow: 0 0 0 2px rgba(31, 85, 166, 0.1);
+}
+
+.marks-entry__divider {
+  width: 100%;
+  height: 1px;
+  background: #E5E5E5;
+}
+
+/* ===========================
+   Footer Section
+   =========================== */
+.marks-entry__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.marks-entry__submit-btn {
+  height: 50px;
+  padding: 0 40px;
+  border: none;
+  border-radius: 12px;
+  background: #1F55A6;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: normal;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.marks-entry__submit-btn:hover {
+  background: #1a4586;
+  box-shadow: 0 4px 12px rgba(31, 85, 166, 0.3);
+  transform: translateY(-1px);
+}
+
+.marks-entry__submit-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(31, 85, 166, 0.2);
+}
+
+/* ===========================
+   Pagination Section
+   =========================== */
+.marks-entry__pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.marks-entry__page-btn {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  padding: 0;
+  border: 1px solid rgba(31, 85, 166, 0.2);
+  border-radius: 6px;
+  background: #FFFFFF;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1;
+  color: #1F55A6;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.marks-entry__page-btn:hover:not(:disabled):not(.marks-entry__page-btn--active) {
+  background: rgba(31, 85, 166, 0.05);
+  border-color: #1F55A6;
+}
+
+.marks-entry__page-btn--active {
+  background: #1F55A6;
+  color: #FFFFFF;
+  border-color: #1F55A6;
+  cursor: default;
+}
+
+.marks-entry__page-btn--ellipsis {
+  border: none;
+  background: transparent;
+  cursor: default;
+}
+
+.marks-entry__page-btn--ellipsis:hover {
+  background: transparent;
+}
+
+.marks-entry__page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.marks-entry__page-btn--prev svg,
+.marks-entry__page-btn--next svg {
+  flex-shrink: 0;
+}
+
+/* ===========================
+   Help Links
+   =========================== */
+.marks-entry__help-links {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 24px;
+}
+
+.marks-entry__help-link {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: normal;
+  color: #1F55A6;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.marks-entry__help-link:hover {
+  opacity: 0.7;
+}
+
+/* ===========================
+   Responsive Design
+   =========================== */
+
+/* Tablet (1200px and below) */
+@media (max-width: 1200px) {
+  .marks-entry {
+    padding: 20px 24px 32px;
+  }
+
+  .marks-entry__title {
+    font-size: 28px;
+  }
+
+  .marks-entry__card {
+    padding: 24px;
+  }
+
+  .marks-entry__filters {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .marks-entry__field {
+    width: calc(50% - 8px);
+    min-width: 200px;
+  }
+}
+
+/* Mobile (768px and below) */
+@media (max-width: 768px) {
+  .marks-entry {
+    padding: 16px 16px 24px;
+  }
+
+  .marks-entry__title {
+    font-size: 24px;
+  }
+
+  .marks-entry__card {
+    padding: 20px;
+  }
+
+  .marks-entry__filters {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .marks-entry__field {
+    width: 100%;
+  }
+
+  .marks-entry__header-content {
+    padding: 10px 12px;
+  }
+
+  .marks-entry__header-text {
+    font-size: 14px;
+  }
+
+  .marks-entry__table-row {
+    padding: 10px 12px;
+  }
+
+  .marks-entry__student-id,
+  .marks-entry__student-name {
+    font-size: 14px;
+  }
+
+  .marks-entry__marks-input {
+    width: 70px;
+    height: 30px;
+    font-size: 14px;
+  }
+
+  .marks-entry__marks-input-wrapper {
+    width: 70px;
+  }
+
+  .marks-entry__footer {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .marks-entry__submit-btn {
+    width: 100%;
+    height: 44px;
+    font-size: 16px;
+  }
+
+  .marks-entry__pagination {
+    justify-content: center;
+  }
+
+  .marks-entry__help-links {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    margin-top: 20px;
+  }
+}
+
+/* Small Mobile (480px and below) */
+@media (max-width: 480px) {
+  .marks-entry {
+    padding: 12px 12px 20px;
+  }
+
+  .marks-entry__title {
+    font-size: 22px;
+  }
+
+  .marks-entry__card {
+    padding: 16px;
+  }
+
+  .marks-entry__table-wrapper {
+    margin-bottom: 24px;
+  }
+
+  .marks-entry__header-content {
+    padding: 8px 10px;
+  }
+
+  .marks-entry__header-text {
+    font-size: 13px;
+  }
+
+  .marks-entry__header-text:first-child {
+    width: 60px;
+  }
+
+  .marks-entry__header-text:nth-child(2) {
+    width: 150px;
+  }
+
+  .marks-entry__header-text--right {
+    width: 60px;
+  }
+
+  .marks-entry__table-row {
+    padding: 8px 10px;
+  }
+
+  .marks-entry__student-info {
+    gap: 12px;
+  }
+
+  .marks-entry__student-id {
+    width: 60px;
+    font-size: 13px;
+  }
+
+  .marks-entry__student-name {
+    width: 150px;
+    font-size: 13px;
+  }
+
+  .marks-entry__marks-input {
+    width: 60px;
+    height: 28px;
+    font-size: 13px;
+    padding: 0 8px;
+  }
+
+  .marks-entry__marks-input-wrapper {
+    width: 60px;
+  }
+
+  .marks-entry__submit-btn {
+    height: 40px;
+    font-size: 15px;
+    padding: 0 24px;
+  }
+
+  .marks-entry__page-btn {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    font-size: 13px;
+  }
+}

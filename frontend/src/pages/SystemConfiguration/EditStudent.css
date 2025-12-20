@@ -1,0 +1,177 @@
+/* ============================================
+   Edit Student Page Styles
+   ============================================ */
+
+.edit-student {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+/* Loading State */
+.edit-student__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-4xl);
+  color: var(--text-secondary);
+}
+
+.edit-student__spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-light);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--spacing-md);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Header */
+.edit-student__header {
+  margin-bottom: var(--spacing-sm);
+}
+
+.edit-student__title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-xs);
+}
+
+.edit-student__subtitle {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Form */
+.edit-student__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.edit-student__section {
+  background: var(--bg-white);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.edit-student__section-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-xl);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-light);
+}
+
+/* Grid Layout */
+.edit-student__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.edit-student__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.edit-student__field--full {
+  grid-column: span 3;
+}
+
+.edit-student__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.edit-student__required {
+  color: #FF4D4F;
+}
+
+.edit-student__input,
+.edit-student__select {
+  height: 44px;
+  padding: 0 var(--spacing-md);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background: var(--bg-white);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.edit-student__input:focus,
+.edit-student__select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(31, 85, 166, 0.1);
+}
+
+.edit-student__input--readonly {
+  background: var(--bg-light);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+.edit-student__select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 40px;
+}
+
+/* Actions */
+.edit-student__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-lg);
+}
+
+/* Responsive */
+@media screen and (max-width: 1024px) {
+  .edit-student__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .edit-student__field--full {
+    grid-column: span 2;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .edit-student__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-student__field--full {
+    grid-column: span 1;
+  }
+
+  .edit-student__section {
+    padding: var(--spacing-lg);
+  }
+
+  .edit-student__actions {
+    flex-direction: column-reverse;
+  }
+
+  .edit-student__actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -1,0 +1,391 @@
+/* ============================================
+   Student My Profile Page Styles
+   ============================================ */
+
+.my-profile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+/* Header */
+.my-profile__header {
+  margin-bottom: var(--spacing-sm);
+}
+
+.my-profile__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.my-profile__subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: var(--spacing-xs) 0 0;
+}
+
+/* Profile Card */
+.my-profile__card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xl);
+  background: linear-gradient(135deg, var(--primary-color), #60A5FA);
+  border-radius: var(--radius-xl);
+  color: var(--bg-white);
+}
+
+.my-profile__main {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.my-profile__avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--bg-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.my-profile__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.my-profile__name {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+}
+
+.my-profile__id {
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+  margin: 0;
+}
+
+.my-profile__badges {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+}
+
+.my-profile__badge {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.my-profile__quick-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.my-profile__quick-link {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--bg-white);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.my-profile__quick-link:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Stats */
+.my-profile__stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-md);
+}
+
+.my-profile__stat {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.my-profile__stat-icon {
+  font-size: 24px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-bg);
+  border-radius: var(--radius-md);
+}
+
+.my-profile__stat > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.my-profile__stat-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+}
+
+.my-profile__stat-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+/* Tabs */
+.my-profile__tabs {
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.my-profile__tab {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.my-profile__tab:hover {
+  background: var(--bg-light);
+}
+
+.my-profile__tab--active {
+  background: var(--primary-color);
+  color: var(--bg-white);
+}
+
+/* Content */
+.my-profile__content {
+  background: var(--bg-white);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.my-profile__section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.my-profile__section:last-child {
+  margin-bottom: 0;
+}
+
+.my-profile__section-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-md);
+}
+
+.my-profile__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-xl);
+}
+
+/* Exams */
+.my-profile__exams {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.my-profile__exam-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  background: var(--bg-light);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--primary-color);
+}
+
+.my-profile__exam-subject {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.my-profile__exam-date {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+/* Announcements */
+.my-profile__announcements {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.my-profile__announcement-item {
+  padding: var(--spacing-md);
+  background: var(--bg-light);
+  border-radius: var(--radius-md);
+}
+
+.my-profile__announcement-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-xs);
+}
+
+.my-profile__announcement-title {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.my-profile__announcement-date {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.my-profile__announcement-content {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Details Grid */
+.my-profile__details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.my-profile__detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.my-profile__detail--full {
+  grid-column: 1 / -1;
+}
+
+.my-profile__detail-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.my-profile__detail-value {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Parent */
+.my-profile__parent-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: var(--bg-light);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.my-profile__parent-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: var(--bg-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.my-profile__parent-name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.my-profile__parent-relation {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin: var(--spacing-xs) 0 0;
+}
+
+/* Responsive */
+@media screen and (max-width: 1024px) {
+  .my-profile__stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .my-profile__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .my-profile__details-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .my-profile__card {
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    text-align: center;
+  }
+
+  .my-profile__main {
+    flex-direction: column;
+  }
+
+  .my-profile__badges {
+    justify-content: center;
+  }
+
+  .my-profile__quick-links {
+    flex-direction: row;
+  }
+
+  .my-profile__tabs {
+    overflow-x: auto;
+  }
+
+  .my-profile__tab {
+    white-space: nowrap;
+  }
+
+  .my-profile__details-grid {
+    grid-template-columns: 1fr;
+  }
+}

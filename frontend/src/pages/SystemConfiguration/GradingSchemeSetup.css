@@ -1,0 +1,427 @@
+/* ============================================
+   Grading Scheme Setup Styles (Figma 1163:15560)
+   ============================================ */
+
+.grading-scheme-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Title */
+.grading-scheme-setup__title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 31px;
+  line-height: 1.2;
+  color: #1F55A6;
+  margin: 0;
+}
+
+/* Content - 2 Column Layout */
+.grading-scheme-setup__content {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+/* Left Card - Form */
+.grading-scheme-setup__form-card {
+  background: #FFFFFF;
+  border: 0.5px solid rgba(31, 85, 166, 0.2);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0px 4px 20px 0px rgba(238, 238, 238, 0.5);
+  flex-shrink: 0;
+}
+
+.grading-scheme-setup__form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.grading-scheme-setup__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Field Group */
+.grading-scheme-setup__field-group {
+  position: relative;
+  height: 74px;
+  width: 400px;
+}
+
+/* Floating Label */
+.grading-scheme-setup__floating-label {
+  position: absolute;
+  top: 0;
+  left: 12px;
+  background: #FFFFFF;
+  padding: 0 4px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 16px;
+  color: #1F55A6;
+  z-index: 1;
+}
+
+/* Input Fields */
+.grading-scheme-setup__input {
+  position: absolute;
+  top: 7px;
+  left: 0;
+  right: 0;
+  height: 48px;
+  border: 1px solid #1F55A6;
+  border-radius: 12px;
+  padding: 0 16px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #1F55A6;
+  outline: none;
+  background: #FFFFFF;
+}
+
+.grading-scheme-setup__input::placeholder {
+  color: #8D8D8D;
+}
+
+.grading-scheme-setup__input:focus {
+  border-color: #1F55A6;
+}
+
+/* Select dropdown */
+.grading-scheme-setup__input--select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M19.9201 8.94995L13.4001 15.47C12.6301 16.24 11.3701 16.24 10.6001 15.47L4.08008 8.94995' stroke='%238D8D8D' stroke-width='1.5' stroke-miterlimit='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 48px;
+  cursor: pointer;
+}
+
+/* Divider */
+.grading-scheme-setup__divider {
+  height: 1px;
+  background: #E0E0E0;
+  width: 100%;
+}
+
+/* Save Button */
+.grading-scheme-setup__btn {
+  background: #1F55A6;
+  color: #FFFFFF;
+  height: 50px;
+  border-radius: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: normal;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.grading-scheme-setup__btn:hover {
+  background: #174389;
+}
+
+/* Right Card - Grade Table */
+.grading-scheme-setup__table-card {
+  background: #FFFFFF;
+  border: 0.5px solid rgba(31, 85, 166, 0.2);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0px 4px 20px 0px rgba(238, 238, 238, 0.5);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.grading-scheme-setup__table-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.2;
+  color: #010101;
+  text-align: center;
+  margin: 0;
+}
+
+/* Table */
+.grading-scheme-setup__table {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Table Header */
+.grading-scheme-setup__table-header {
+  background: linear-gradient(to right, #d9e8ff 140.31%, #ffffff);
+  border: 1px solid #CADFFF;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.grading-scheme-setup__th {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #425166;
+  flex: 1;
+}
+
+.grading-scheme-setup__th--grade {
+  width: 200px;
+  flex: none;
+}
+
+.grading-scheme-setup__th--action {
+  text-align: center;
+}
+
+/* Table Body */
+.grading-scheme-setup__table-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Table Row */
+.grading-scheme-setup__row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.grading-scheme-setup__td {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #333333;
+  flex: 1;
+}
+
+.grading-scheme-setup__td--grade {
+  width: 200px;
+  flex: none;
+}
+
+.grading-scheme-setup__td--action {
+  display: flex;
+  justify-content: center;
+}
+
+/* Edit Button */
+.grading-scheme-setup__edit-btn {
+  background: rgba(31, 85, 166, 0.05);
+  border: 1px solid #1F55A6;
+  border-radius: 6px;
+  height: 32px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.grading-scheme-setup__edit-btn:hover {
+  background: rgba(31, 85, 166, 0.1);
+}
+
+/* Footer Links */
+.grading-scheme-setup__footer {
+  display: flex;
+  gap: 24px;
+  padding: 0 12px;
+}
+
+.grading-scheme-setup__link {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #333333;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.grading-scheme-setup__link:hover {
+  color: #1F55A6;
+}
+
+/* Responsive */
+@media screen and (max-width: 1200px) {
+  .grading-scheme-setup__content {
+    flex-direction: column;
+  }
+
+  .grading-scheme-setup__form-card,
+  .grading-scheme-setup__table-card {
+    width: 100%;
+  }
+
+  .grading-scheme-setup__field-group {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .grading-scheme-setup__title {
+    font-size: 24px;
+  }
+
+  .grading-scheme-setup__table-header,
+  .grading-scheme-setup__row {
+    overflow-x: auto;
+  }
+
+  .grading-scheme-setup__th,
+  .grading-scheme-setup__td {
+    min-width: 100px;
+  }
+}
+
+/* ============================================
+   Edit Grade Modal Styles (Figma 1163:16429)
+   ============================================ */
+
+/* Backdrop */
+.grading-scheme-setup__modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(51, 51, 51, 0.3);
+  backdrop-filter: blur(7px);
+  z-index: 999;
+}
+
+/* Modal Container */
+.grading-scheme-setup__modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Modal Content */
+.grading-scheme-setup__modal-content {
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Modal Header */
+.grading-scheme-setup__modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.grading-scheme-setup__modal-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.2;
+  color: #010101;
+  text-align: center;
+  margin: 0;
+  width: 100%;
+}
+
+/* Modal Divider */
+.grading-scheme-setup__modal-divider {
+  height: 1px;
+  background: #E0E0E0;
+  width: 100%;
+}
+
+/* Modal Form */
+.grading-scheme-setup__modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.grading-scheme-setup__modal-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Modal Actions */
+.grading-scheme-setup__modal-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.grading-scheme-setup__modal-btn {
+  flex: 1;
+  height: 50px;
+  border-radius: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: normal;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+}
+
+.grading-scheme-setup__modal-btn--save {
+  background: #1F55A6;
+  color: #FFFFFF;
+}
+
+.grading-scheme-setup__modal-btn--save:hover {
+  background: #174389;
+}
+
+.grading-scheme-setup__modal-btn--delete {
+  background: #FFFFFF;
+  color: #E00000;
+  border: 1px solid #E00000;
+}
+
+.grading-scheme-setup__modal-btn--delete:hover {
+  background: rgba(224, 0, 0, 0.05);
+}
+
+/* Responsive Modal */
+@media screen and (max-width: 768px) {
+  .grading-scheme-setup__modal {
+    width: 90%;
+    max-width: 500px;
+  }
+}
+

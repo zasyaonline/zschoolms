@@ -1,0 +1,459 @@
+/* ============================================
+   Marks History Page Styles
+   ============================================ */
+
+.marks-history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+/* Header */
+.marks-history__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.marks-history__back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-medium);
+  background: var(--bg-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.marks-history__back-btn:hover {
+  background: var(--bg-light);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.marks-history__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.marks-history__subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: var(--spacing-xs) 0 0;
+}
+
+/* Filters */
+.marks-history__filters {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: flex-end;
+}
+
+.marks-history__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.marks-history__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.marks-history__select {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background: var(--bg-white);
+  cursor: pointer;
+  appearance: none;
+  min-width: 150px;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.marks-history__select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.marks-history__export-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--primary-color);
+  color: var(--bg-white);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  margin-left: auto;
+}
+
+.marks-history__export-btn:hover {
+  background: var(--primary-hover);
+}
+
+/* Summary */
+.marks-history__summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-md);
+}
+
+.marks-history__summary-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-xl);
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.marks-history__summary-card--gpa {
+  background: linear-gradient(135deg, var(--primary-color), #60A5FA);
+  color: var(--bg-white);
+}
+
+.marks-history__summary-value {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.marks-history__summary-label {
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+  margin-top: var(--spacing-xs);
+}
+
+.marks-history__summary-card:not(.marks-history__summary-card--gpa) .marks-history__summary-value {
+  color: var(--primary-color);
+}
+
+.marks-history__summary-card:not(.marks-history__summary-card--gpa) .marks-history__summary-label {
+  color: var(--text-muted);
+}
+
+.marks-history__summary-trend {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  padding: 2px var(--spacing-xs);
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-sm);
+}
+
+.marks-history__summary-trend--up {
+  color: #86EFAC;
+}
+
+/* Card */
+.marks-history__card {
+  background: var(--bg-white);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.marks-history__card-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-lg);
+}
+
+/* Subjects */
+.marks-history__subjects {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.marks-history__subject {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.marks-history__subject-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-md);
+}
+
+.marks-history__subject-name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.marks-history__subject-code {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.marks-history__final-grade {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.marks-history__final-grade--aplus,
+.marks-history__final-grade--a {
+  background: #DCFCE7;
+  color: #166534;
+}
+
+.marks-history__final-grade--bplus,
+.marks-history__final-grade--b {
+  background: #DBEAFE;
+  color: #1E40AF;
+}
+
+.marks-history__final-grade--c {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.marks-history__final-grade--d,
+.marks-history__final-grade--f {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+/* Terms */
+.marks-history__terms {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.marks-history__term {
+  display: grid;
+  grid-template-columns: 100px 1fr 60px;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background: var(--bg-light);
+  border-radius: var(--radius-md);
+}
+
+.marks-history__term-name {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.marks-history__term-marks {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.marks-history__progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--border-light);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.marks-history__progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color), #60A5FA);
+  border-radius: var(--radius-full);
+  transition: width var(--transition-base);
+}
+
+.marks-history__term-score {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  min-width: 60px;
+  text-align: right;
+}
+
+.marks-history__term-grade {
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+}
+
+.marks-history__term-grade--aplus,
+.marks-history__term-grade--a {
+  background: #DCFCE7;
+  color: #166534;
+}
+
+.marks-history__term-grade--bplus,
+.marks-history__term-grade--b {
+  background: #DBEAFE;
+  color: #1E40AF;
+}
+
+.marks-history__subject-footer {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-light);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+/* Historical */
+.marks-history__historical {
+  display: flex;
+  gap: var(--spacing-md);
+  overflow-x: auto;
+  padding: var(--spacing-sm);
+}
+
+.marks-history__year-card {
+  flex: 1;
+  min-width: 150px;
+  padding: var(--spacing-lg);
+  background: var(--bg-light);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  position: relative;
+}
+
+.marks-history__year-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: var(--spacing-md);
+}
+
+.marks-history__year-stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-xl);
+}
+
+.marks-history__year-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.marks-history__year-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary-color);
+}
+
+.marks-history__year-desc {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.marks-history__year-arrow {
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: var(--text-muted);
+}
+
+/* Actions */
+.marks-history__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+}
+
+.marks-history__btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-xl);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: var(--bg-white);
+  border: 1px solid var(--border-medium);
+  color: var(--text-secondary);
+}
+
+.marks-history__btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.marks-history__btn--primary {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--bg-white);
+}
+
+.marks-history__btn--primary:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+/* Responsive */
+@media screen and (max-width: 1024px) {
+  .marks-history__summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .marks-history__filters {
+    flex-wrap: wrap;
+  }
+
+  .marks-history__export-btn {
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
+  }
+
+  .marks-history__term {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xs);
+  }
+
+  .marks-history__term-marks {
+    order: 2;
+  }
+
+  .marks-history__historical {
+    flex-direction: column;
+  }
+
+  .marks-history__year-arrow {
+    display: none;
+  }
+
+  .marks-history__actions {
+    flex-direction: column;
+  }
+
+  .marks-history__btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

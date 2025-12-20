@@ -1,0 +1,157 @@
+/* ============================================
+   Add Student Page Styles
+   ============================================ */
+
+.add-student {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.add-student__header {
+  margin-bottom: var(--spacing-sm);
+}
+
+.add-student__title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-xs);
+}
+
+.add-student__subtitle {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Form */
+.add-student__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.add-student__section {
+  background: var(--bg-white);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.add-student__section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-xl);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.add-student__section-title svg {
+  color: var(--primary-color);
+}
+
+/* Grid Layout */
+.add-student__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.add-student__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.add-student__field--full {
+  grid-column: span 3;
+}
+
+.add-student__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.add-student__required {
+  color: #FF4D4F;
+}
+
+.add-student__input,
+.add-student__select {
+  height: 44px;
+  padding: 0 var(--spacing-md);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background: var(--bg-white);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.add-student__input:focus,
+.add-student__select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(31, 85, 166, 0.1);
+}
+
+.add-student__input::placeholder {
+  color: var(--black-b400);
+}
+
+.add-student__select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 40px;
+}
+
+/* Actions */
+.add-student__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-lg);
+}
+
+/* Responsive */
+@media screen and (max-width: 1024px) {
+  .add-student__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .add-student__field--full {
+    grid-column: span 2;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .add-student__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .add-student__field--full {
+    grid-column: span 1;
+  }
+
+  .add-student__section {
+    padding: var(--spacing-lg);
+  }
+
+  .add-student__actions {
+    flex-direction: column-reverse;
+  }
+
+  .add-student__actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

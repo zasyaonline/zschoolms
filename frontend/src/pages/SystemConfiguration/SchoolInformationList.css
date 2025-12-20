@@ -1,0 +1,611 @@
+/* ============================================
+   School Information List Styles (Figma 1163:15752)
+   ============================================ */
+
+.school-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Title */
+.school-info-list__title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 31px;
+  line-height: 1.2;
+  color: #1F55A6;
+  margin: 0;
+}
+
+/* Card Container */
+.school-info-list__card {
+  background: #FFFFFF;
+  border: 0.5px solid rgba(31, 85, 166, 0.2);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0px 4px 20px 0px rgba(238, 238, 238, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Toolbar */
+.school-info-list__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Search */
+.school-info-list__search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 35.78px;
+  width: 300px;
+  padding: 0 12px;
+  border: 1px solid #707070;
+  border-radius: 8px;
+}
+
+.school-info-list__search svg {
+  flex-shrink: 0;
+}
+
+.school-info-list__search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 24px;
+  color: #333333;
+  background: transparent;
+}
+
+.school-info-list__search-input::placeholder {
+  color: #8D8D8D;
+}
+
+/* Actions */
+.school-info-list__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.school-info-list__filter-btn {
+  width: 44px;
+  height: 35.78px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #707070;
+  border-radius: 8px;
+  background: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.school-info-list__filter-btn:hover {
+  background: #F5F5F5;
+}
+
+.school-info-list__add-btn {
+  background: #1F55A6;
+  color: #FFFFFF;
+  height: 35.78px;
+  padding: 8.889px 12.444px;
+  border-radius: 10px;
+  border: none;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 12.444px;
+  line-height: 17.778px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.school-info-list__add-btn:hover {
+  background: #174389;
+}
+
+/* Table */
+.school-info-list__table {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Table Header */
+.school-info-list__table-header {
+  background: linear-gradient(to right, #d9e8ff 140.31%, #ffffff);
+  border: 1px solid #CADFFF;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.school-info-list__th {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #425166;
+}
+
+.school-info-list__th--student {
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.school-info-list__th--school {
+  width: 250px;
+  flex-shrink: 0;
+}
+
+.school-info-list__th--grade {
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.school-info-list__th--year,
+.school-info-list__th--contact {
+  flex: 1;
+  min-width: 0;
+}
+
+.school-info-list__th--actions {
+  width: 92px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+/* Table Body */
+.school-info-list__table-body {
+  background: #FAFCFF;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Table Row */
+.school-info-list__row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.school-info-list__td {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #333333;
+  word-wrap: break-word;
+}
+
+.school-info-list__td--student {
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.school-info-list__td--school {
+  width: 250px;
+  flex-shrink: 0;
+}
+
+.school-info-list__td--grade {
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.school-info-list__td--year,
+.school-info-list__td--contact {
+  flex: 1;
+  min-width: 0;
+}
+
+.school-info-list__td--actions {
+  width: 92px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* Edit Button */
+.school-info-list__edit-btn {
+  background: rgba(31, 85, 166, 0.05);
+  border: 1px solid #1F55A6;
+  border-radius: 6px;
+  height: 32px;
+  padding: 7px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.school-info-list__edit-btn:hover {
+  background: rgba(31, 85, 166, 0.1);
+}
+
+/* Divider */
+.school-info-list__divider {
+  height: 1px;
+  background: #E0E0E0;
+  width: 100%;
+}
+
+/* Footer Links */
+.school-info-list__footer {
+  display: flex;
+  gap: 24px;
+  padding: 0 12px;
+}
+
+.school-info-list__link {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #333333;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.school-info-list__link:hover {
+  color: #1F55A6;
+}
+
+/* ============================================
+   Modal Styles
+   ============================================ */
+
+/* Backdrop */
+.school-info-list__modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(51, 51, 51, 0.3);
+  backdrop-filter: blur(7px);
+  z-index: 999;
+}
+
+/* Modal Container */
+.school-info-list__modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Modal Content */
+.school-info-list__modal-content {
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Modal Header */
+.school-info-list__modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.school-info-list__modal-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.2;
+  color: #010101;
+  text-align: center;
+  margin: 0;
+  flex: 1;
+}
+
+.school-info-list__close-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #1F55A6;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.school-info-list__close-btn:hover {
+  background: rgba(31, 85, 166, 0.1);
+}
+
+/* Modal Divider */
+.school-info-list__modal-divider {
+  height: 1px;
+  background: #E0E0E0;
+  width: 100%;
+}
+
+/* Modal Form */
+.school-info-list__modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.school-info-list__modal-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ============================================
+   Students Section (Modal)
+   ============================================ */
+
+.school-info-list__students-section {
+  background: #FFFFFF;
+  border: 1px solid #F5F5F5;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.school-info-list__section-label {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #1F55A6;
+  margin: 0;
+}
+
+.school-info-list__section-divider {
+  height: 1px;
+  background: #E0E0E0;
+  width: 100%;
+}
+
+.school-info-list__student-search-wrapper {
+  border: 1px solid #707070;
+  border-radius: 8px;
+  height: 35.78px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.school-info-list__student-search-wrapper--disabled {
+  background: #F5F5F5;
+  opacity: 0.7;
+}
+
+.school-info-list__student-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 24px;
+  color: #333333;
+  background: transparent;
+}
+
+.school-info-list__student-search-input:disabled {
+  cursor: not-allowed;
+}
+
+.school-info-list__student-search-input::placeholder {
+  color: #8D8D8D;
+}
+
+.school-info-list__student-item {
+  background: rgba(31, 85, 166, 0.05);
+  border-radius: 8px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.school-info-list__student-item:hover:not(.school-info-list__student-item--readonly) {
+  background: rgba(31, 85, 166, 0.1);
+}
+
+.school-info-list__student-item--selected {
+  background: rgba(31, 85, 166, 0.05);
+}
+
+.school-info-list__student-item--readonly {
+  cursor: default;
+}
+
+.school-info-list__student-item span {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #333333;
+}
+
+.school-info-list__checkbox-fill {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================
+   Field Group
+   ============================================ */
+
+/* Field Group */
+.school-info-list__field-group {
+  position: relative;
+  height: 74px;
+  width: 100%;
+}
+
+/* Floating Label */
+.school-info-list__floating-label {
+  position: absolute;
+  top: 0;
+  left: 12px;
+  background: #FFFFFF;
+  padding: 0 4px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 16px;
+  color: #1F55A6;
+  z-index: 1;
+}
+
+/* Input Fields */
+.school-info-list__input {
+  position: absolute;
+  top: 7px;
+  left: 0;
+  right: 0;
+  height: 48px;
+  border: 1px solid #1F55A6;
+  border-radius: 12px;
+  padding: 0 16px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #1F55A6;
+  outline: none;
+  background: #FFFFFF;
+}
+
+.school-info-list__input::placeholder {
+  color: #8D8D8D;
+}
+
+.school-info-list__input:focus {
+  border-color: #1F55A6;
+}
+
+/* Modal Actions */
+.school-info-list__modal-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.school-info-list__modal-btn {
+  flex: 1;
+  height: 50px;
+  border-radius: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: normal;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+}
+
+.school-info-list__modal-btn--save {
+  background: #1F55A6;
+  color: #FFFFFF;
+}
+
+.school-info-list__modal-btn--save:hover {
+  background: #174389;
+}
+
+.school-info-list__modal-btn--cancel {
+  background: #FFFFFF;
+  color: #1F55A6;
+  border: 1px solid #1F55A6;
+}
+
+.school-info-list__modal-btn--cancel:hover {
+  background: rgba(31, 85, 166, 0.05);
+}
+
+.school-info-list__modal-btn--delete {
+  background: #FFFFFF;
+  color: #E00000;
+  border: 1px solid #E00000;
+}
+
+.school-info-list__modal-btn--delete:hover {
+  background: rgba(224, 0, 0, 0.05);
+}
+
+/* Responsive */
+@media screen and (max-width: 1200px) {
+  .school-info-list__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .school-info-list__search {
+    width: 100%;
+  }
+
+  .school-info-list__actions {
+    justify-content: space-between;
+  }
+
+  .school-info-list__table-header,
+  .school-info-list__row {
+    overflow-x: auto;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .school-info-list__title {
+    font-size: 24px;
+  }
+
+  .school-info-list__th,
+  .school-info-list__td {
+    min-width: 120px;
+  }
+
+  .school-info-list__modal {
+    width: 90%;
+    max-width: 500px;
+  }
+}

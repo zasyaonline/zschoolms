@@ -3,6 +3,10 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './components/Layout/MainLayout';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 
+// Auth pages (not lazy loaded for faster initial load)
+import Login from './pages/Auth/Login';
+import ForgotPassword from './pages/Auth/ForgotPassword';
+
 // Lazy load pages for code splitting
 const UserList = lazy(() => import('./pages/UserManagement/UserList'));
 const StudentList = lazy(() => import('./pages/SystemConfiguration/StudentList'));
@@ -23,6 +27,28 @@ const TeacherMarksHistory = lazy(() => import('./pages/TeacherFlow/MarksHistory'
 const MyProfile = lazy(() => import('./pages/StudentFlow/MyProfile'));
 const MyAttendance = lazy(() => import('./pages/StudentFlow/MyAttendance'));
 const MyMarksHistory = lazy(() => import('./pages/StudentFlow/MyMarksHistory'));
+
+// Auth helper - check if user is authenticated
+const isAuthenticated = () => {
+  const token = localStorage.getItem('accessToken');
+  return !!token;
+};
+
+// Protected Route wrapper
+const ProtectedRoute = ({ children }) => {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
+// Public Route wrapper (redirect to dashboard if already logged in)
+const PublicRoute = ({ children }) => {
+  if (isAuthenticated()) {
+    return <Navigate to="/users" replace />;
+  }
+  return children;
+};
 
 // Loading component
 const LoadingFallback = () => (
@@ -59,7 +85,24 @@ function App() {
   return (
     <ErrorBoundary>
       <Routes>
-        <Route path="/" element={<MainLayout />}>
+        {/* Public Auth Routes */}
+        <Route path="/login" element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        } />
+        <Route path="/forgot-password" element={
+          <PublicRoute>
+            <ForgotPassword />
+          </PublicRoute>
+        } />
+
+        {/* Protected Routes with MainLayout */}
+        <Route path="/" element={
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        }>
           {/* Default redirect */}
           <Route index element={<Navigate to="/users" replace />} />
           

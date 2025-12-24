@@ -1,0 +1,9 @@
+========================================
+Sponsor Management API Tests
+========================================
+
+========================================
+Step 1: Admin Login
+========================================
+Login Response: {"success":true,"requiresMFA":true,"tempToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZmOGUzMmY5LTM3NjUtNGIxZC1iNzBmLTFkY2MyMDIxMjc0YiIsIm1mYVBlbmRpbmciOnRydWUsImlhdCI6MTc2NjM5OTc4MSwiZXhwIjoxNzY2NDAwMzgxfQ.xej9Ee0_At00jzveaUCyMBgdOLVj-RJbsOWMqcASyto","message":"Verification code sent to your email"}
+[0;31mFailed to get authentication token[0m

@@ -1,0 +1,28 @@
+{
+  "watch": [
+    "src"
+  ],
+  "ignore": [
+    "node_modules",
+    "uploads",
+    "tests",
+    "**/*.test.js",
+    "**/*.spec.js",
+    ".git",
+    "*.log",
+    "*.md"
+  ],
+  "ext": "js,json",
+  "delay": 1000,
+  "verbose": false,
+  "execMap": {
+    "js": "node"
+  },
+  "events": {
+    "restart": "echo '🔄 Restarting server...'",
+    "crash": "echo '❌ Server crashed. Waiting for changes...'"
+  },
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

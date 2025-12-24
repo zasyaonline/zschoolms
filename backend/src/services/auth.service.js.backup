@@ -1,0 +1,596 @@
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import { User, RefreshToken, AuditLog } from '../models/index.js';
+import { sendMFACode, verifyMFACode } from './mfa.service.js';
+import logger, { logAuth, logSecurity } from '../utils/logger.js';
+
+/**
+ * Authentication Service
+ * Handles login, MFA, token management, and logout
+ */
+
+/**
+ * Generate JWT access token
+ * @param {Object} user - User object
+ * @returns {string} JWT token
+ */
+export const generateAccessToken = (user) => {
+  const payload = {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    role: user.role,
+  };
+
+  return jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRY || '15m',
+  });
+};
+
+/**
+ * Generate refresh token
+ * @param {string} userId - User UUID
+ * @param {string} ipAddress - Client IP
+ * @param {string} userAgent - Client user agent
+ * @returns {Promise<Object>} Refresh token object
+ */
+export const generateRefreshToken = async (userId, ipAddress, userAgent) => {
+  const token = crypto.randomBytes(64).toString('hex');
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + parseInt(process.env.REFRESH_TOKEN_EXPIRY_DAYS || 30));
+
+  const refreshToken = await RefreshToken.create({
+    user_id: userId,
+    token,
+    expires_at: expiresAt,
+    ip_address: ipAddress,
+    user_agent: userAgent,
+  });
+
+  return refreshToken;
+};
+
+/**
+ * Verify JWT access token
+ * @param {string} token - JWT token
+ * @returns {Object|null} Decoded token payload or null
+ */
+export const verifyAccessToken = (token) => {
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET);
+  } catch (error) {
+    logger.warn('JWT verification failed:', error.message);
+    return null;
+  }
+};
+
+/**
+ * Verify refresh token
+ * @param {string} token - Refresh token
+ * @returns {Promise<Object|null>} RefreshToken object or null
+ */
+export const verifyRefreshToken = async (token) => {
+  const refreshToken = await RefreshToken.findOne({
+    where: { token },
+    include: [
+      {
+        model: User,
+        as: 'user',
+      },
+    ],
+  });
+
+  if (!refreshToken) {
+    return null;
+  }
+
+  if (!refreshToken.isValid()) {
+    return null;
+  }
+
+  return refreshToken;
+};
+
+/**
+ * Login user with username/email and password
+ * @param {string} emailOrUsername - Email or username
+ * @param {string} password - Password
+ * @param {string} ipAddress - Client IP
+ * @param {string} userAgent - Client user agent
+ * @returns {Promise<Object>} Login result
+ */
+export const login = async (emailOrUsername, password, ipAddress, userAgent) => {
+  try {
+    // Find user by credentials
+    const user = await User.findByCredentials(emailOrUsername, password);
+
+    if (!user) {
+      // Log failed login attempt
+      await AuditLog.logAction({
+        action: 'LOGIN_FAILED',
+        ipAddress,
+        userAgent,
+        status: 'FAILURE',
+        errorMessage: 'Invalid credentials',
+        metadata: { emailOrUsername },
+      });
+
+      logAuth('login_failed', {
+        emailOrUsername,
+        ipAddress,
+        reason: 'Invalid credentials',
+      });
+
+      return {
+        success: false,
+        message: 'Invalid credentials',
+      };
+    }
+
+    // Check if user is active
+    if (!user.isActive) {
+      await AuditLog.logAction({
+        userId: user.id,
+        action: 'LOGIN_FAILED',
+        ipAddress,
+        userAgent,
+        status: 'FAILURE',
+        errorMessage: 'Account deactivated',
+      });
+
+      logAuth('login_failed', {
+        userId: user.id,
+        ipAddress,
+        reason: 'Account deactivated',
+      });
+
+      return {
+        success: false,
+        message: 'Your account has been deactivated. Please contact administrator.',
+      };
+    }
+
+    // Check if MFA is required
+    const requiresMFA = user.re for admin/principal
+    const requiresMFA = user.requiresMFA();
+
+    if (requiresMFA) {
+      // Send MFA code via email
+      await sendMFACode(user);
+      
+      // Generate temporary token for MFA verification
+      const tempToken = jwt.sign(
+        { id: user.id, mfaPending: true },
+        process.env.JWT_SECRET,
+        { expiresIn: '10m' }
+      );
+
+      logAuth('login_mfa_pending', {
+        userId: user.id,
+        ipAddress,
+      });
+
+      return {
+        success: true,
+        requiresMFA: true,
+        tempToken,
+        message: 'Verification code sent to your email
+    }
+
+    // Generate tokens
+    const accessToken = generateAccessToken(user);
+    const refreshToken = await generateRefreshToken(user.id, ipAddress, userAgent);
+
+    // Update last login
+    user.lastLoginAt = new Date();
+    await user.save();
+
+    // Log successful login
+    await AuditLog.logAction({
+      userId: user.id,
+      action: 'LOGIN',
+      ipAddress,
+      userAgent,
+      status: 'SUCCESS',
+    });
+
+    logAuth('login_success', {
+      userId: user.id,
+      username: user.username,
+      ipAddress,
+    });
+
+    return {
+      success: true,
+      requiresMFA: false,
+      accessToken,
+      refreshToken: refreshToken.token,
+      user: user.toJSON(),
+    };
+  } catch (error) {
+    logger.error('Login error:', error);
+    throw error;
+  }
+};email code
+ * @param {string} tempToken - Temporary JWT token
+ * @param {string} code - 6-digit email code
+ * @param {string} ipAddress - Client IP
+ * @param {string} userAgent - Client user agent
+ * @returns {Promise<Object>} MFA verification result
+ */
+export const verifyMFA = async (tempToken, code, ipAddress, userAgent) => {
+  try {
+    // Verify temp token
+    const decoded = jwt.verify(tempToken, process.env.JWT_SECRET);
+
+    if (!decoded.mfaPending) {
+      return {
+        success: false,
+        message: 'Invalid verification token',
+      };
+    }
+
+    // Verify email code
+    const result = await verifyMFACode(decoded.id, code);
+    
+    if (!result.success) {
+      await AuditLog.logAction({
+        userId: decoded.id,
+        action: 'LOGIN_FAILED',
+        ipAddress,
+        userAgent,
+        status: 'FAILURE',
+        errorMessage: result.message,
+      });
+
+      logSecurity('mfa_verification_failed', {
+        userId: decoded.id,
+        ipAddress,
+        reason: result.message,
+      });
+
+      return {
+        success: false,
+        message: result.message,
+      };
+    }
+
+    const user = result.user;
+
+    if (!user || !user.is_active) {
+      return {
+        success: false,
+        message: 'User account is inactive',
+      }userId: user.id,
+        ipAddress,
+        remainingCodes: user.mfaBackupCodes.length,
+      });
+    }
+
+    // Generate tokens
+    const accessToken = generateAccessToken(user);
+    const refreshToken = await generateRefreshToken(user.id, ipAddress, userAgent);
+
+    // Update last login
+    user.lastLoginAt = new Date();
+    await user.save();
+
+    // Log successful login
+    await AuditLog.logAction({
+      userId: user.id,
+      action: 'LOGIN',
+      ipAddress,
+      userAgent,
+      status: 'SUCCESS',
+      metadata: { mfaVerified: true },
+    });
+
+    logAuth('login_success_mfa', {
+      userId: user.id,
+      username: user.username,
+      ipAddress,
+    });
+
+    return {
+      success: true,
+      accessToken,
+      refreshToken: refreshToken.token,
+      user: user.toJSON(),
+    };
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return {
+        success: false,
+        message: 'MFA verification timeout. Please login again.',
+      };
+    }
+    logger.error('MFA verification error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Refresh access token
+ * @param {string} refreshTokenString - Refresh token
+ * @param {string} ipAddress - Client IP
+ * @param {string} userAgent - Client user agent
+ * @returns {Promise<Object>} Refresh result
+ */
+export const refreshAccessToken = async (refreshTokenString, ipAddress, userAgent) => {
+  try {
+    const refreshToken = await verifyRefreshToken(refreshTokenString);
+
+    if (!refreshToken) {
+      return {
+        success: false,
+        message: 'Invalid or expired refresh token',
+      };
+    }
+
+    const user = refreshToken.user;
+
+    if (!user || !user.isActive) {
+      return {
+        success: false,
+        message: 'User not found or deactivated',
+      };
+    }
+
+    // Generate new access token
+    const accessToken = generateAccessToken(user);
+
+    // Optionally rotate refresh token (recommended for security)
+    if (process.env.ROTATE_REFRESH_TOKENS === 'true') {
+      // Revoke old token
+      await refreshToken.revoke();
+
+      // Generate new refresh token
+      const newRefreshToken = await generateRefreshToken(user.id, ipAddress, userAgent);
+
+      logAuth('token_refresh_rotated', {
+        userId: user.id,
+        ipAddress,
+      });
+
+      return {
+        success: true,
+        accessToken,
+        refreshToken: newRefreshToken.token,
+      };
+    }
+
+    logAuth('token_refresh', {
+      userId: user.id,
+      ipAddress,
+    });
+
+    return {
+      success: true,
+      accessToken,
+      refreshToken: refreshTokenString,
+    };
+  } catch (error) {
+    logger.error('Token refresh error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Logout user
+ * @param {string} refreshTokenString - Refresh token to revoke
+ * @param {string} userId - User ID
+ * @param {string} ipAddress - Client IP
+ * @param {string} userAgent - Client user agent
+ * @returns {Promise<Object>} Logout result
+ */
+export const logout = async (refreshTokenString, userId, ipAddress, userAgent) => {
+  try {
+    if (refreshTokenString) {
+      const refreshToken = await RefreshToken.findOne({
+        where: { token: refreshTokenString },
+      });
+
+      if (refreshToken) {
+        await refreshToken.revoke();
+      }
+    }
+
+    // Log logout
+    await AuditLog.logAction({
+      userId,
+      action: 'LOGOUT',
+      ipAddress,
+      userAgent,
+      status: 'SUCCESS',
+    });
+
+    logAuth('logout', {
+      userId,
+      ipAddress,
+    });
+
+    return {
+      success: true,
+      message: 'Logged out successfully',
+    };
+  } catch (error) {
+    logger.error('Logout error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Setup MFA for user
+ * @param {string} userId - User UUID
+ * @returns {Promise<Object>} MFA setup data
+ */
+export const setupMFA = async (userId) => {
+  try {
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return {
+        success: false,
+        message: 'User not found',
+      };
+    }
+
+    // Generate secret
+    const secret = speakeasy.generateSecret({
+      name: `ZSchool (${user.email})`,
+      issuer: 'ZSchool Management System',
+    });
+
+    // Generate QR code
+    const qrCodeUrl = await QRCode.toDataURL(secret.otpauth_url);
+
+    // Generate backup codes (8 codes)
+    const backupCodes = Array.from({ length: 8 }, () =>
+      crypto.randomBytes(4).toString('hex').toUpperCase()
+    );
+
+    // Save secret (not enabled yet until user verifies)
+    user.mfaSecret = secret.base32;
+    user.mfaBackupCodes = backupCodes;
+    await user.save();
+
+    logSecurity('mfa_setup_initiated', {
+      userId: user.id,
+    });
+
+    return {
+      success: true,
+      secret: secret.base32,
+      qrCode: qrCodeUrl,
+      backupCodes,
+    };
+  } catch (error) {
+    logger.error('MFA setup error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Enable MFA after verification
+ * @param {string} userId - User UUID
+ * @param {string} totpCode - TOTP code to verify setup
+ * @returns {Promise<Object>} Enable result
+ */
+export const enableMFA = async (userId, totpCode) => {
+  try {
+    const user = await User.findByPk(userId);
+
+    if (!user || !user.mfaSecret) {
+      return {
+        success: false,
+        message: 'User not found or MFA not set up',
+      };
+    }
+
+    // Verify TOTP code
+    const verified = speakeasy.totp.verify({
+      secret: user.mfaSecret,
+      encoding: 'base32',
+      token: totpCode,
+      window: 2,
+    });
+
+    if (!verified) {
+      return {
+        success: false,
+        message: 'Invalid verification code',
+      };
+    }
+
+    // Enable MFA
+    user.mfaEnabled = true;
+    await user.save();
+
+    // Log MFA enabled
+    await AuditLog.logAction({
+      userId: user.id,
+      action: 'MFA_ENABLED',
+      status: 'SUCCESS',
+    });
+
+    logSecurity('mfa_enabled', {
+      userId: user.id,
+    });
+
+    return {
+      success: true,
+      message: 'MFA enabled successfully',
+    };
+  } catch (error) {
+    logger.error('MFA enable error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Disable MFA
+ * @param {string} userId - User UUID
+ * @param {string} password - User password for verification
+ * @returns {Promise<Object>} Disable result
+ */
+export const disableMFA = async (userId, password) => {
+  try {
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return {
+        success: false,
+        message: 'User not found',
+      };
+    }
+
+    // Verify password
+    const isPasswordValid = await user.comparePassword(password);
+
+    if (!isPasswordValid) {
+      return {
+        success: false,
+        message: 'Invalid password',
+      };
+    }
+
+    // Disable MFA
+    user.mfaEnabled = false;
+    user.mfaSecret = null;
+    user.mfaBackupCodes = [];
+    await user.save();
+
+    // Log MFA disabled
+    await AuditLog.logAction({
+      userId: user.id,
+      action: 'MFA_DISABLED',
+      status: 'SUCCESS',
+    });
+
+    logSecurity('mfa_disabled', {
+      userId: user.id,
+    });
+
+    return {
+      success: true,
+      message: 'MFA disabled successfully',
+    };
+  } catch (error) {
+    logger.error('MFA disable error:', error);
+    throw error;
+  }
+};
+
+export default {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyAccessToken,
+  verifyRefreshToken,
+  login,
+  verifyMFA,
+  refreshAccessToken,
+  logout,
+  setupMFA,
+  enableMFA,
+  disableMFA,
+};

@@ -1,4 +1,5 @@
 # Netlify Configuration for ZSchool Management System Frontend
+# This file must be at repository root for Netlify to recognize it
 
 # Build settings
 [build]
@@ -32,18 +33,3 @@
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
-
-# Development context (branch deploys)
-[context.develop]
-  command = "npm install && npm run build --workspace=frontend"
-
-# Pull request previews
-[context.branch-deploy]
-  command = "npm install && npm run build --workspace=frontend"
-
-# Production context
-[context.production]
-  command = "npm install && npm run build --workspace=frontend"
-  
-[context.production.environment]
-  NODE_ENV = "production"

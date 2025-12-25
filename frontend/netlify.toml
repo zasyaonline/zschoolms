@@ -2,9 +2,9 @@
 
 # Build settings
 [build]
-  base = "frontend"
-  command = "npm install && npm run build"
-  publish = "dist"
+  base = "/"
+  command = "npm install && npm run build --workspace=frontend"
+  publish = "frontend/dist"
 
 # Environment variables (also set in Netlify Dashboard)
 [build.environment]
@@ -35,15 +35,15 @@
 
 # Development context (branch deploys)
 [context.develop]
-  command = "npm install && npm run build"
+  command = "npm install && npm run build --workspace=frontend"
 
 # Pull request previews
 [context.branch-deploy]
-  command = "npm install && npm run build"
+  command = "npm install && npm run build --workspace=frontend"
 
 # Production context
 [context.production]
-  command = "npm install && npm run build"
+  command = "npm install && npm run build --workspace=frontend"
   
 [context.production.environment]
   NODE_ENV = "production"

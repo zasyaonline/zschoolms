@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { login } from '../../services/auth.service';
 import './Auth.css';
 
 const Login = () => {
@@ -55,20 +56,9 @@ const Login = () => {
     setApiError('');
     
     try {
-      const response = await fetch('http://localhost:5001/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          emailOrUsername: formData.email,
-          password: formData.password
-        }),
-      });
+      const data = await login(formData.email, formData.password);
       
-      const data = await response.json();
-      
-      if (response.ok && data.success) {
+      if (data.success) {
         // Store tokens
         localStorage.setItem('accessToken', data.data.accessToken);
         localStorage.setItem('refreshToken', data.data.refreshToken);
@@ -86,11 +76,11 @@ const Login = () => {
           navigate('/users');
         }
       } else {
-        setApiError(data.error?.message || data.message || 'Login failed. Please check your credentials.');
+        setApiError(data.message || 'Login failed. Please check your credentials.');
       }
     } catch (error) {
       console.error('Login error:', error);
-      setApiError('Unable to connect to server. Please try again later.');
+      setApiError(error.message || 'Unable to connect to server. Please try again later.');
     } finally {
       setIsLoading(false);
     }

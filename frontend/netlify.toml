@@ -1,0 +1,49 @@
+# Netlify Configuration for ZSchool Management System Frontend
+
+# Build settings
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+# Environment variables (also set in Netlify Dashboard)
+[build.environment]
+  NODE_VERSION = "20.19.6"
+
+# Redirect rules for SPA (Single Page Application)
+# This ensures React Router works correctly on page refresh
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Security Headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+
+# Cache static assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Development context (branch deploys)
+[context.develop]
+  command = "npm run build"
+
+# Pull request previews
+[context.branch-deploy]
+  command = "npm run build"
+
+# Production context
+[context.production]
+  command = "npm run build"
+  
+[context.production.environment]
+  NODE_ENV = "production"

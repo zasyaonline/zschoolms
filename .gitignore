@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Deployment secrets
+.deployment-secrets.txt
+.env.production.local
+*.env.local

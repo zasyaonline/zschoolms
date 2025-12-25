@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { forgotPassword } from '../../services/auth.service';
 import './Auth.css';
 
 const ForgotPassword = () => {
@@ -33,22 +34,9 @@ const ForgotPassword = () => {
     setError('');
     
     try {
-      const response = await fetch('http://localhost:5001/api/auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        setIsSuccess(true);
-      } else {
-        // Even if user not found, show success for security
-        setIsSuccess(true);
-      }
+      await forgotPassword(email);
+      // Always show success for security (don't reveal if email exists)
+      setIsSuccess(true);
     } catch (error) {
       console.error('Forgot password error:', error);
       // Show success anyway for security (don't reveal if email exists)

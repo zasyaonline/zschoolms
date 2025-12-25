@@ -35,15 +35,15 @@
 
 # Development context (branch deploys)
 [context.develop]
-  command = "npm run build"
+  command = "npm install && npm run build"
 
 # Pull request previews
 [context.branch-deploy]
-  command = "npm run build"
+  command = "npm install && npm run build"
 
 # Production context
 [context.production]
-  command = "npm run build"
+  command = "npm install && npm run build"
   
 [context.production.environment]
   NODE_ENV = "production"

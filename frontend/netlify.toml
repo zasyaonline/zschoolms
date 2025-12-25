@@ -3,7 +3,7 @@
 # Build settings
 [build]
   base = "frontend"
-  command = "npm run build"
+  command = "npm install && npm run build"
   publish = "dist"
 
 # Environment variables (also set in Netlify Dashboard)

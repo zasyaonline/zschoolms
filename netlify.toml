@@ -4,7 +4,7 @@
 # Build settings
 [build]
   base = "/"
-  command = "rm -rf node_modules package-lock.json && npm install --legacy-peer-deps && npm run build --workspace=frontend"
+  command = "npm ci --include=optional --workspace=frontend && npm run build --workspace=frontend"
   publish = "frontend/dist"
 
 # Environment variables (also set in Netlify Dashboard)

@@ -1,95 +1,79 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
 import './MarksApprovalList.css';
 
 const MarksApprovalList = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [approvalList, setApprovalList] = useState([
-    {
-      id: 1,
-      teacherName: 'Alex Buckmaster',
-      studentName: 'John Doe',
-      grade: '9A',
-      subject: 'Mathematics',
-      marks: 85,
-      status: 'pending'
-    },
-    {
-      id: 2,
-      teacherName: 'Samantha Green',
-      studentName: 'Michael Liu',
-      grade: '7C',
-      subject: 'Physics',
-      marks: 92,
-      status: 'approved'
-    },
-    {
-      id: 3,
-      teacherName: 'Emily Carter',
-      studentName: 'David Smith',
-      grade: '10B',
-      subject: 'Chemistry',
-      marks: 78,
-      status: 'pending'
-    },
-    {
-      id: 4,
-      teacherName: 'Ryan Taylor',
-      studentName: 'Sophia Johnson',
-      grade: '9B',
-      subject: 'Biology',
-      marks: 88,
-      status: 'declined'
-    },
-    {
-      id: 5,
-      teacherName: 'Olivia Martinez',
-      studentName: 'Daniel Brown',
-      grade: '8A',
-      subject: 'History',
-      marks: 90,
-      status: 'pending'
-    },
-    {
-      id: 6,
-      teacherName: 'Ethan Wilson',
-      studentName: 'Emma Garcia',
-      grade: '7A',
-      subject: 'Literature',
-      marks: 95,
-      status: 'pending'
-    },
-    {
-      id: 7,
-      teacherName: 'Mia Perez',
-      studentName: 'Luke Robinson',
-      grade: '6B',
-      subject: 'Geography',
-      marks: 83,
-      status: 'pending'
-    },
-    {
-      id: 8,
-      teacherName: 'Isabella Hall',
-      studentName: 'James Clark',
-      grade: '11A',
-      subject: 'Computer Science',
-      marks: 80,
-      status: 'pending'
-    }
-  ]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [approvalList, setApprovalList] = useState([]);
+  const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 50 });
 
-  const handleApprove = (id) => {
-    setApprovalList(approvalList.map(item =>
-      item.id === id ? { ...item, status: 'approved' } : item
-    ));
+  useEffect(() => {
+    fetchPendingMarksheets();
+  }, [pagination.page]);
+
+  const fetchPendingMarksheets = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.get(`/marks/pending?page=${pagination.page}&limit=${pagination.limit}`);
+      const marksheets = res.data?.marksheets || [];
+      
+      // Transform marksheets to approval list format
+      const formattedList = marksheets.map(ms => ({
+        id: ms.id,
+        teacherName: ms.submittedBy?.name || ms.teacher?.name || 'N/A',
+        studentName: ms.enrollment?.student?.user?.name || 
+                     `${ms.enrollment?.student?.firstName || ''} ${ms.enrollment?.student?.lastName || ''}`.trim() || 
+                     'N/A',
+        grade: ms.enrollment?.class?.name || ms.class?.name || 'N/A',
+        subject: ms.subject?.name || 'N/A',
+        marks: ms.totals?.totalMarksObtained || ms.marksObtained || 0,
+        maxMarks: ms.totals?.totalMaxMarks || ms.maxMarks || 100,
+        status: ms.status === 'submitted' ? 'pending' : ms.status
+      }));
+      
+      setApprovalList(formattedList);
+      setPagination(prev => ({
+        ...prev,
+        total: res.data?.pagination?.total || 0,
+        page: res.data?.pagination?.page || 1
+      }));
+    } catch (err) {
+      console.error('Error fetching pending marksheets:', err);
+      setError('Failed to load approval list. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDecline = (id) => {
-    setApprovalList(approvalList.map(item =>
-      item.id === id ? { ...item, status: 'declined' } : item
-    ));
+  const handleApprove = async (id) => {
+    try {
+      await api.patch(`/marks/marksheets/${id}/approve`);
+      // Update local state optimistically
+      setApprovalList(approvalList.map(item =>
+        item.id === id ? { ...item, status: 'approved' } : item
+      ));
+    } catch (err) {
+      console.error('Error approving marksheet:', err);
+      alert('Failed to approve. Please try again.');
+    }
+  };
+
+  const handleDecline = async (id) => {
+    try {
+      await api.patch(`/marks/marksheets/${id}/reject`);
+      // Update local state optimistically
+      setApprovalList(approvalList.map(item =>
+        item.id === id ? { ...item, status: 'declined' } : item
+      ));
+    } catch (err) {
+      console.error('Error declining marksheet:', err);
+      alert('Failed to decline. Please try again.');
+    }
   };
 
   const handleViewReview = (id) => {
@@ -107,6 +91,33 @@ const MarksApprovalList = () => {
       item.marks.toString().includes(query)
     );
   });
+
+  if (loading) {
+    return (
+      <div className="approvals-list">
+        <div className="approvals-list__header">
+          <h1 className="approvals-list__title">Approvals List</h1>
+        </div>
+        <div className="approvals-list__loading">
+          <p>Loading pending approvals...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="approvals-list">
+        <div className="approvals-list__header">
+          <h1 className="approvals-list__title">Approvals List</h1>
+        </div>
+        <div className="approvals-list__error">
+          <p>{error}</p>
+          <button onClick={fetchPendingMarksheets}>Try Again</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="approvals-list">

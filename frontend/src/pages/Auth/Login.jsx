@@ -73,7 +73,7 @@ const Login = () => {
           localStorage.setItem('tempToken', data.data.tempToken);
           navigate('/mfa-verify');
         } else {
-          navigate('/users');
+          navigate('/dashboard');
         }
       } else {
         setApiError(data.message || 'Login failed. Please check your credentials.');

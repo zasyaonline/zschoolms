@@ -49,9 +49,9 @@ app.get('/api/health', (req, res) => {
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || 'development',
     database: 'PostgreSQL',
+    documentation: '/api-docs',
   });
 });
-documentation: '/api-docs',
     
 // API version info
 app.get('/api', (req, res) => {
@@ -86,8 +86,8 @@ import attendanceRoutes from './routes/attendance.routes.js';
 import marksRoutes from './routes/marks.routes.js';
 import reportCardRoutes from './routes/reportcard.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
-// import schoolRoutes from './routes/school.routes.js';
-// import gradeRoutes from './routes/grade.routes.js';
+import schoolRoutes from './routes/school.routes.js';
+import gradingSchemeRoutes from './routes/gradingscheme.routes.js';
 
 console.log('🔌 Mounting routes...');
 app.use('/api/auth', authRoutes);
@@ -99,9 +99,8 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/marks', marksRoutes);
 app.use('/api/report-cards', reportCardRoutes);
 app.use('/api/analytics', analyticsRoutes);
-// app.use('/api/students', studentRoutes);
-// app.use('/api/schools', schoolRoutes);
-// app.use('/api/grades', gradeRoutes);
+app.use('/api/schools', schoolRoutes);
+app.use('/api/grading-schemes', gradingSchemeRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

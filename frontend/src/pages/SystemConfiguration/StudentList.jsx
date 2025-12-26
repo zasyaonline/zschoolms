@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import api from '../../services/api';
 import { studentValidationSchema, validateForm, sanitizeFormData } from '../../utils/validation';
 import './StudentList.css';
 
@@ -19,16 +20,48 @@ const StudentList = () => {
     sponsor: ''
   });
   const [validationErrors, setValidationErrors] = useState({});
+  
+  // State for API data
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
 
-  // Sample student data
-  const students = [
-    { id: 1, admissionNo: 'STU001', name: 'Emma Wilson', grade: 'Grade 10', section: 'A', rollNo: '01', parent: 'Michael Wilson', status: 'active' },
-    { id: 2, admissionNo: 'STU002', name: 'James Brown', grade: 'Grade 10', section: 'A', rollNo: '02', parent: 'David Brown', status: 'active' },
-    { id: 3, admissionNo: 'STU003', name: 'Sophia Davis', grade: 'Grade 9', section: 'B', rollNo: '05', parent: 'Sarah Davis', status: 'active' },
-    { id: 4, admissionNo: 'STU004', name: 'Oliver Martinez', grade: 'Grade 11', section: 'A', rollNo: '03', parent: 'Maria Martinez', status: 'inactive' },
-    { id: 5, admissionNo: 'STU005', name: 'Ava Johnson', grade: 'Grade 8', section: 'C', rollNo: '12', parent: 'Robert Johnson', status: 'active' },
-    { id: 6, admissionNo: 'STU006', name: 'William Taylor', grade: 'Grade 10', section: 'B', rollNo: '08', parent: 'Jennifer Taylor', status: 'active' },
-  ];
+  useEffect(() => {
+    fetchStudents();
+  }, [pagination.page, selectedGrade, selectedSection]);
+
+  const fetchStudents = async () => {
+    try {
+      setLoading(true);
+      let url = `/students?page=${pagination.page}&limit=${pagination.limit}`;
+      if (selectedGrade) url += `&grade=${selectedGrade}`;
+      if (selectedSection) url += `&section=${selectedSection}`;
+      
+      const response = await api.get(url);
+      if (response.success && response.data) {
+        // Map API response to component format
+        const mappedStudents = (response.data.students || []).map(student => ({
+          id: student.id,
+          admissionNo: student.admissionNumber || student.enrollmentNumber || 'N/A',
+          name: student.user ? `${student.user.firstName || ''} ${student.user.lastName || ''}`.trim() : 'Unknown',
+          grade: student.currentClass || 'N/A',
+          section: student.section || 'N/A',
+          rollNo: student.rollNumber || 'N/A',
+          parent: student.parentName || 'N/A',
+          status: student.isActive ? 'active' : 'inactive'
+        }));
+        setStudents(mappedStudents);
+        setPagination(prev => ({
+          ...prev,
+          total: response.data.pagination?.total || mappedStudents.length
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching students:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleView = (student) => {
     setSelectedStudent(student);
@@ -102,12 +135,22 @@ const StudentList = () => {
     }
     
     // TODO: Add API call here
-    // await api.students.create(sanitizedData);
+    // await api.post('/students', sanitizedData);
     closeModal();
+    fetchStudents(); // Refresh list
   };
 
-  const handleDelete = () => {
+  const handleDelete = async (studentId) => {
     if (window.confirm('Are you sure you want to delete this student?')) {
+      try {
+        // TODO: Add API call
+        // await api.delete(`/students/${studentId}`);
+        fetchStudents(); // Refresh list
+      } catch (error) {
+        console.error('Error deleting student:', error);
+      }
+    }
+  };
       // TODO: Add API call here
       // await api.students.delete(id);
       // After successful deletion, refresh the student list
@@ -189,7 +232,17 @@ const StudentList = () => {
         </div>
 
         <div className="student-list__table-body">
-          {students.map((student, index) => (
+          {loading ? (
+            <div className="student-list__loading">
+              <div className="student-list__spinner"></div>
+              <p>Loading students...</p>
+            </div>
+          ) : students.length === 0 ? (
+            <div className="student-list__empty">No students found</div>
+          ) : students.filter(s => 
+            s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            s.admissionNo.toLowerCase().includes(searchTerm.toLowerCase())
+          ).map((student, index) => (
             <div key={student.id}>
               <div className="student-list__row">
                 <div className="student-list__td student-list__td--admission">{student.admissionNo}</div>
@@ -248,19 +301,25 @@ const StudentList = () => {
       </div>
 
       <div className="student-list__pagination">
-        <span className="student-list__pagination-info">Showing 1-6 of 150 students</span>
+        <span className="student-list__pagination-info">
+          Showing {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)} - {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} students
+        </span>
         <div className="student-list__pagination-controls">
-          <button className="student-list__pagination-btn" disabled>
+          <button 
+            className="student-list__pagination-btn" 
+            disabled={pagination.page === 1}
+            onClick={() => setPagination(p => ({ ...p, page: p.page - 1 }))}
+          >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
-          <button className="student-list__pagination-btn student-list__pagination-btn--active">1</button>
-          <button className="student-list__pagination-btn">2</button>
-          <button className="student-list__pagination-btn">3</button>
-          <span className="student-list__pagination-ellipsis">...</span>
-          <button className="student-list__pagination-btn">25</button>
-          <button className="student-list__pagination-btn">
+          <span className="student-list__pagination-current">Page {pagination.page} of {Math.ceil(pagination.total / pagination.limit) || 1}</span>
+          <button 
+            className="student-list__pagination-btn"
+            disabled={pagination.page * pagination.limit >= pagination.total}
+            onClick={() => setPagination(p => ({ ...p, page: p.page + 1 }))}
+          >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="9 18 15 12 9 6"/>
             </svg>

@@ -1,22 +1,84 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './MarksEntry.css';
+import { studentService, marksService } from '../../services';
 
 const MarksEntry = () => {
   const [selectedGrade, setSelectedGrade] = useState('9A');
-  const [selectedSubject, setSelectedSubject] = useState('Chemistry');
+  const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedExamType, setSelectedExamType] = useState('Mid Semester');
   const [totalMarks, setTotalMarks] = useState('100');
   const [currentPage, setCurrentPage] = useState(1);
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [pagination, setPagination] = useState({ total: 0, totalPages: 1 });
+  
+  // Subject options - could be fetched from API in the future
+  const subjects = [
+    { id: 'chemistry', name: 'Chemistry' },
+    { id: 'physics', name: 'Physics' },
+    { id: 'mathematics', name: 'Mathematics' },
+    { id: 'biology', name: 'Biology' },
+    { id: 'english', name: 'English' },
+    { id: 'history', name: 'History' },
+  ];
 
-  // Sample student data with marks (6 students as shown in design)
-  const [students, setStudents] = useState([
-    { id: 24573, name: 'John Doe', marks: 87 },
-    { id: 24574, name: 'Jane Smith', marks: 87 },
-    { id: 24575, name: 'Emily Johnson', marks: 87 },
-    { id: 24576, name: 'Michael Brown', marks: 87 },
-    { id: 24577, name: 'Chris Davis', marks: 87 },
-    { id: 24578, name: 'Sarah Wilson', marks: 87 }
-  ]);
+  const examTypes = ['Mid Semester', 'Final Exam', 'Unit Test', 'Quarterly'];
+
+  // Fetch students when grade changes
+  const fetchStudents = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Parse grade and section from selectedGrade (e.g., "9A" -> class: "9", section: "A")
+      const gradeMatch = selectedGrade.match(/^(\d+)([A-Za-z]?)$/);
+      const classNum = gradeMatch ? gradeMatch[1] : selectedGrade;
+      const section = gradeMatch && gradeMatch[2] ? gradeMatch[2] : '';
+
+      const response = await studentService.getStudents({ 
+        class: classNum, 
+        section: section,
+        page: currentPage,
+        limit: 20
+      });
+      
+      if (response.success && response.data) {
+        const studentList = response.data.students || response.data || [];
+        
+        // Map students with initial marks
+        const studentsWithMarks = studentList.map(student => ({
+          id: student.id,
+          name: student.user?.name || `${student.user?.firstName || ''} ${student.user?.lastName || ''}`.trim() || 'Unknown',
+          enrollmentNumber: student.enrollmentNumber,
+          marks: ''
+        }));
+
+        setStudents(studentsWithMarks);
+        setPagination({
+          total: response.data.pagination?.total || studentList.length,
+          totalPages: response.data.pagination?.totalPages || 1
+        });
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to fetch students');
+      console.error('Error fetching students:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedGrade, currentPage]);
+
+  useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]);
+
+  // Set default subject on mount
+  useEffect(() => {
+    if (subjects.length > 0 && !selectedSubject) {
+      setSelectedSubject(subjects[0].id);
+    }
+  }, []);
 
   const handleMarksChange = (studentId, value) => {
     const numValue = value === '' ? '' : Math.max(0, Math.min(parseInt(value) || 0, parseInt(totalMarks)));
@@ -25,10 +87,55 @@ const MarksEntry = () => {
     ));
   };
 
-  const handleSubmit = () => {
-    // TODO: Add API call to submit marks
-    // await api.marks.submit(selectedGrade, selectedSubject, students);
-    alert('Marks submitted successfully!');
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    setError(null);
+    setSuccessMessage('');
+
+    try {
+      // Parse grade and section
+      const gradeMatch = selectedGrade.match(/^(\d+)([A-Za-z]?)$/);
+      const classNum = gradeMatch ? gradeMatch[1] : selectedGrade;
+      const section = gradeMatch && gradeMatch[2] ? gradeMatch[2] : '';
+
+      // Collect marks data
+      const marksData = students
+        .filter(s => s.marks !== '' && s.marks !== null)
+        .map(student => ({
+          studentId: student.id,
+          subjectId: selectedSubject,
+          marksObtained: parseInt(student.marks),
+          maxMarks: parseInt(totalMarks),
+          examType: selectedExamType,
+          class: classNum,
+          section: section
+        }));
+
+      if (marksData.length === 0) {
+        setError('Please enter marks for at least one student.');
+        setSubmitting(false);
+        return;
+      }
+
+      const response = await marksService.enterMarks({
+        subjectId: selectedSubject,
+        examType: selectedExamType,
+        marks: marksData
+      });
+
+      if (response.success) {
+        setSuccessMessage('Marks submitted successfully!');
+        // Clear marks after successful submission
+        setStudents(prev => prev.map(s => ({ ...s, marks: '' })));
+      } else {
+        setError(response.message || 'Failed to submit marks');
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to submit marks');
+      console.error('Error submitting marks:', err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -36,6 +143,20 @@ const MarksEntry = () => {
       <div className="marks-entry__title-container">
         <h1 className="marks-entry__title">Marks Entry</h1>
       </div>
+
+      {error && (
+        <div className="marks-entry__error">
+          {error}
+          <button onClick={() => setError(null)}>×</button>
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="marks-entry__success">
+          {successMessage}
+          <button onClick={() => setSuccessMessage('')}>×</button>
+        </div>
+      )}
 
       <div className="marks-entry__card">
         {/* Filters Row */}
@@ -47,10 +168,18 @@ const MarksEntry = () => {
               value={selectedGrade}
               onChange={(e) => setSelectedGrade(e.target.value)}
             >
+              <option value="7A">7A</option>
+              <option value="7B">7B</option>
+              <option value="8A">8A</option>
+              <option value="8B">8B</option>
               <option value="9A">9A</option>
               <option value="9B">9B</option>
               <option value="10A">10A</option>
               <option value="10B">10B</option>
+              <option value="11A">11A</option>
+              <option value="11B">11B</option>
+              <option value="12A">12A</option>
+              <option value="12B">12B</option>
             </select>
             <svg className="marks-entry__dropdown-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M6 9L12 15L18 9" stroke="#8D8D8D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -64,10 +193,9 @@ const MarksEntry = () => {
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
             >
-              <option value="Chemistry">Chemistry</option>
-              <option value="Physics">Physics</option>
-              <option value="Mathematics">Mathematics</option>
-              <option value="Biology">Biology</option>
+              {subjects.map(subject => (
+                <option key={subject.id} value={subject.id}>{subject.name}</option>
+              ))}
             </select>
             <svg className="marks-entry__dropdown-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M6 9L12 15L18 9" stroke="#8D8D8D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -81,10 +209,9 @@ const MarksEntry = () => {
               value={selectedExamType}
               onChange={(e) => setSelectedExamType(e.target.value)}
             >
-              <option value="Mid Semester">Mid Semester</option>
-              <option value="Final Exam">Final Exam</option>
-              <option value="Unit Test">Unit Test</option>
-              <option value="Quarterly">Quarterly</option>
+              {examTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
             </select>
             <svg className="marks-entry__dropdown-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M6 9L12 15L18 9" stroke="#8D8D8D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -109,55 +236,77 @@ const MarksEntry = () => {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="marks-entry__table-wrapper">
-          <div className="marks-entry__table">
-            {/* Header */}
-            <div className="marks-entry__table-header">
-              <div className="marks-entry__header-content">
-                <div className="marks-entry__header-left">
-                  <span className="marks-entry__header-text">Id</span>
-                  <span className="marks-entry__header-text">Student Name</span>
-                </div>
-                <span className="marks-entry__header-text marks-entry__header-text--right">Mark Entry</span>
-              </div>
-            </div>
+        {/* Loading State */}
+        {loading && (
+          <div className="marks-entry__loading">
+            <div className="marks-entry__spinner"></div>
+            <p>Loading students...</p>
+          </div>
+        )}
 
-            {/* Body */}
-            <div className="marks-entry__table-body">
-              {students.map((student, index) => (
-                <div key={student.id}>
-                  <div className="marks-entry__table-row">
-                    <div className="marks-entry__row-content">
-                      <div className="marks-entry__student-info">
-                        <span className="marks-entry__student-id">{student.id}</span>
-                        <span className="marks-entry__student-name">{student.name}</span>
-                      </div>
-                      <div className="marks-entry__marks-input-wrapper">
-                        <input
-                          type="number"
-                          className="marks-entry__marks-input"
-                          value={student.marks}
-                          onChange={(e) => handleMarksChange(student.id, e.target.value)}
-                          min="0"
-                          max={totalMarks}
-                        />
+        {/* No Students Message */}
+        {!loading && students.length === 0 && (
+          <div className="marks-entry__empty">
+            <p>No students found for the selected class. Please select a different grade/class.</p>
+          </div>
+        )}
+
+        {/* Table */}
+        {!loading && students.length > 0 && (
+          <div className="marks-entry__table-wrapper">
+            <div className="marks-entry__table">
+              {/* Header */}
+              <div className="marks-entry__table-header">
+                <div className="marks-entry__header-content">
+                  <div className="marks-entry__header-left">
+                    <span className="marks-entry__header-text">ID</span>
+                    <span className="marks-entry__header-text">Student Name</span>
+                  </div>
+                  <span className="marks-entry__header-text marks-entry__header-text--right">Mark Entry</span>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="marks-entry__table-body">
+                {students.map((student, index) => (
+                  <div key={student.id}>
+                    <div className="marks-entry__table-row">
+                      <div className="marks-entry__row-content">
+                        <div className="marks-entry__student-info">
+                          <span className="marks-entry__student-id">{student.enrollmentNumber || student.id.substring(0, 8)}</span>
+                          <span className="marks-entry__student-name">{student.name}</span>
+                        </div>
+                        <div className="marks-entry__marks-input-wrapper">
+                          <input
+                            type="number"
+                            className="marks-entry__marks-input"
+                            value={student.marks}
+                            onChange={(e) => handleMarksChange(student.id, e.target.value)}
+                            min="0"
+                            max={totalMarks}
+                            placeholder="0"
+                          />
+                        </div>
                       </div>
                     </div>
+                    {index < students.length - 1 && (
+                      <div className="marks-entry__divider"></div>
+                    )}
                   </div>
-                  {index < students.length - 1 && (
-                    <div className="marks-entry__divider"></div>
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Footer Actions */}
         <div className="marks-entry__footer">
-          <button className="marks-entry__submit-btn" onClick={handleSubmit}>
-            Submit Marks
+          <button 
+            className="marks-entry__submit-btn" 
+            onClick={handleSubmit}
+            disabled={submitting || students.length === 0}
+          >
+            {submitting ? 'Submitting...' : 'Submit Marks'}
           </button>
 
           <div className="marks-entry__pagination">
@@ -170,25 +319,36 @@ const MarksEntry = () => {
                 <path d="M10 12L6 8L10 4" stroke="#1F55A6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
-            <button className="marks-entry__page-btn marks-entry__page-btn--active">
-              1
-            </button>
-            <button className="marks-entry__page-btn" onClick={() => setCurrentPage(2)}>
-              2
-            </button>
-            <button className="marks-entry__page-btn marks-entry__page-btn--ellipsis">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="4" cy="8" r="1" fill="#1F55A6"/>
-                <circle cx="8" cy="8" r="1" fill="#1F55A6"/>
-                <circle cx="12" cy="8" r="1" fill="#1F55A6"/>
-              </svg>
-            </button>
-            <button className="marks-entry__page-btn" onClick={() => setCurrentPage(10)}>
-              10
-            </button>
+            {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                className={`marks-entry__page-btn ${currentPage === page ? 'marks-entry__page-btn--active' : ''}`}
+                onClick={() => setCurrentPage(page)}
+              >
+                {page}
+              </button>
+            ))}
+            {pagination.totalPages > 5 && (
+              <>
+                <button className="marks-entry__page-btn marks-entry__page-btn--ellipsis">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <circle cx="4" cy="8" r="1" fill="#1F55A6"/>
+                    <circle cx="8" cy="8" r="1" fill="#1F55A6"/>
+                    <circle cx="12" cy="8" r="1" fill="#1F55A6"/>
+                  </svg>
+                </button>
+                <button 
+                  className="marks-entry__page-btn" 
+                  onClick={() => setCurrentPage(pagination.totalPages)}
+                >
+                  {pagination.totalPages}
+                </button>
+              </>
+            )}
             <button
               className="marks-entry__page-btn marks-entry__page-btn--next"
-              onClick={() => setCurrentPage(prev => prev + 1)}
+              disabled={currentPage >= pagination.totalPages}
+              onClick={() => setCurrentPage(prev => Math.min(pagination.totalPages, prev + 1))}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M6 12L10 8L6 4" stroke="#1F55A6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

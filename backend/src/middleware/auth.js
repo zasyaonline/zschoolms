@@ -42,17 +42,26 @@ export const authenticate = async (req, res, next) => {
 
 /**
  * Middleware to check if user has required role(s)
+ * Supports both spread arguments: authorize('admin', 'teacher')
+ * And array argument: authorize(['admin', 'teacher'])
  */
 export const authorize = (...roles) => {
+  // Flatten in case an array was passed as first argument
+  const allowedRoles = roles.flat();
+  
   return (req, res, next) => {
     if (!req.user) {
       return next(new AuthenticationError('User not authenticated'));
     }
 
-    if (!roles.includes(req.user.role)) {
+    // Case-insensitive role check
+    const userRole = req.user.role?.toLowerCase();
+    const hasRole = allowedRoles.some(role => role.toLowerCase() === userRole);
+    
+    if (!hasRole) {
       return next(
         new AuthorizationError(
-          `Access denied. Required role(s): ${roles.join(', ')}`
+          `Access denied. Required role(s): ${allowedRoles.join(', ')}`
         )
       );
     }

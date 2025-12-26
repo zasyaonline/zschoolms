@@ -1,15 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import AdminDashboard from './AdminDashboard';
 import './Dashboard.css';
 
 const Dashboard = () => {
+  const [userRole, setUserRole] = useState(null);
   // Generate chart data once to avoid impure function calls during render
   const [chartData] = useState(() => 
     ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map(day => ({
       day,
-      presentHeight: 60 + Math.random() * 35,
-      absentHeight: 5 + Math.random() * 10
+      Present: Math.floor(800 + Math.random() * 200),
+      Absent: Math.floor(20 + Math.random() * 50)
     }))
   );
+
+  useEffect(() => {
+    // Get user role from localStorage
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      setUserRole(user.role);
+    }
+  }, []);
+
+  // Route to role-specific dashboard
+  if (userRole === 'admin') {
+    return <AdminDashboard />;
+  }
+
+  // Default dashboard for other roles (teacher, student, staff)
   
   const stats = [
     { 
@@ -180,7 +199,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Attendance Overview Chart Placeholder */}
+      {/* Attendance Overview Chart */}
       <div className="dashboard__card dashboard__card--chart">
         <div className="dashboard__card-header">
           <h3 className="dashboard__card-title">Attendance Overview</h3>
@@ -190,32 +209,46 @@ const Dashboard = () => {
             <button className="dashboard__chart-filter">Year</button>
           </div>
         </div>
-        <div className="dashboard__chart-placeholder">
-          <div className="dashboard__chart-bars">
-            {chartData.map((data) => (
-              <div key={data.day} className="dashboard__chart-bar-group">
-                <div 
-                  className="dashboard__chart-bar dashboard__chart-bar--present" 
-                  style={{ height: `${data.presentHeight}%` }}
-                ></div>
-                <div 
-                  className="dashboard__chart-bar dashboard__chart-bar--absent" 
-                  style={{ height: `${data.absentHeight}%` }}
-                ></div>
-                <span className="dashboard__chart-label">{data.day}</span>
-              </div>
-            ))}
-          </div>
-          <div className="dashboard__chart-legend">
-            <span className="dashboard__legend-item">
-              <span className="dashboard__legend-dot dashboard__legend-dot--present"></span>
-              Present
-            </span>
-            <span className="dashboard__legend-item">
-              <span className="dashboard__legend-dot dashboard__legend-dot--absent"></span>
-              Absent
-            </span>
-          </div>
+        <div className="dashboard__chart-container">
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+              <XAxis 
+                dataKey="day" 
+                tick={{ fill: '#666', fontSize: 12 }}
+                axisLine={{ stroke: '#e0e0e0' }}
+              />
+              <YAxis 
+                tick={{ fill: '#666', fontSize: 12 }}
+                axisLine={{ stroke: '#e0e0e0' }}
+              />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: '#fff', 
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}
+                cursor={{ fill: 'rgba(76, 175, 80, 0.1)' }}
+              />
+              <Legend 
+                wrapperStyle={{ paddingTop: '20px' }}
+                iconType="circle"
+              />
+              <Bar 
+                dataKey="Present" 
+                fill="#4CAF50" 
+                radius={[8, 8, 0, 0]}
+                maxBarSize={60}
+              />
+              <Bar 
+                dataKey="Absent" 
+                fill="#F44336" 
+                radius={[8, 8, 0, 0]}
+                maxBarSize={60}
+              />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>

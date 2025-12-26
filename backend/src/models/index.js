@@ -11,6 +11,8 @@ import Mark from './Mark.js';
 import ReportCard from './ReportCard.js';
 import ReportCardAttachment from './ReportCardAttachment.js';
 import ReportCardDistributionLog from './ReportCardDistributionLog.js';
+import GradingScheme from './GradingScheme.js';
+import School from './School.js';
 
 /**
  * Define Model Associations
@@ -286,5 +288,7 @@ export {
   Mark,
   ReportCard,
   ReportCardAttachment,
-  ReportCardDistributionLog
+  ReportCardDistributionLog,
+  GradingScheme,
+  School
 };

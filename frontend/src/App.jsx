@@ -8,6 +8,7 @@ import Login from './pages/Auth/Login';
 import ForgotPassword from './pages/Auth/ForgotPassword';
 
 // Lazy load pages for code splitting
+const Dashboard = lazy(() => import('./pages/Dashboard/Dashboard'));
 const UserList = lazy(() => import('./pages/UserManagement/UserList'));
 const StudentList = lazy(() => import('./pages/SystemConfiguration/StudentList'));
 const SponsorStudentMapping = lazy(() => import('./pages/SystemConfiguration/SponsorStudentMapping'));
@@ -104,7 +105,16 @@ function App() {
           </ProtectedRoute>
         }>
           {/* Default redirect */}
-          <Route index element={<Navigate to="/users" replace />} />
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          
+          {/* Dashboard */}
+          <Route path="dashboard" element={
+            <ErrorBoundary>
+              <Suspense fallback={<LoadingFallback />}>
+                <Dashboard />
+              </Suspense>
+            </ErrorBoundary>
+          } />
           
           {/* User Management */}
           <Route path="users" element={

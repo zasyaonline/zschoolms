@@ -1,52 +1,184 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './MyProfile.css';
+import { studentService, attendanceService } from '../../services';
 
 const MyProfile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-  const [student] = useState({
-    studentId: 'STU-2024-001',
-    name: 'Emma Wilson',
-    avatar: 'EW',
-    class: 'Grade 10-A',
-    rollNo: '001',
-    dateOfBirth: '2009-05-15',
-    gender: 'Female',
-    bloodGroup: 'O+',
-    email: 'emma.wilson@student.school.edu',
-    phone: '+1 (555) 123-4567',
-    address: '123 Maple Street, Springfield, IL 62701',
-    admissionDate: '2019-04-01',
+  const [student, setStudent] = useState({
+    studentId: '',
+    name: '',
+    avatar: '',
+    class: '',
+    rollNo: '',
+    dateOfBirth: '',
+    gender: '',
+    bloodGroup: '',
+    email: '',
+    phone: '',
+    address: '',
+    admissionDate: '',
     status: 'Active',
     parent: {
-      name: 'Robert Wilson',
-      relation: 'Father',
-      email: 'robert.wilson@email.com',
-      phone: '+1 (555) 987-6543',
-      occupation: 'Software Engineer'
+      name: '',
+      relation: '',
+      email: '',
+      phone: '',
+      occupation: ''
     }
   });
 
-  const [academicStats] = useState({
-    currentGPA: 3.85,
-    classRank: 3,
-    totalStudents: 35,
-    attendanceRate: 96.5,
-    subjectsEnrolled: 8
+  const [academicStats, setAcademicStats] = useState({
+    currentGPA: 0,
+    classRank: 0,
+    totalStudents: 0,
+    attendanceRate: 0,
+    subjectsEnrolled: 0
   });
 
   const [upcomingExams] = useState([
-    { subject: 'Mathematics', date: '2024-12-20', time: '9:00 AM' },
-    { subject: 'Science', date: '2024-12-22', time: '9:00 AM' },
-    { subject: 'English', date: '2024-12-24', time: '9:00 AM' },
+    { subject: 'Mathematics', date: '2025-01-10', time: '9:00 AM' },
+    { subject: 'Science', date: '2025-01-12', time: '9:00 AM' },
+    { subject: 'English', date: '2025-01-14', time: '9:00 AM' },
   ]);
 
   const [announcements] = useState([
-    { date: '2024-12-15', title: 'Winter Break Schedule', content: 'School will remain closed from Dec 25 to Jan 2.' },
-    { date: '2024-12-10', title: 'Science Fair Results', content: 'Congratulations to all participants!' },
+    { date: '2024-12-20', title: 'Winter Break Schedule', content: 'School will remain closed from Dec 25 to Jan 2.' },
+    { date: '2024-12-18', title: 'New Year Celebration', content: 'Cultural program on January 3rd.' },
   ]);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Get user from localStorage
+        const userStr = localStorage.getItem('user');
+        const user = userStr ? JSON.parse(userStr) : null;
+        
+        if (!user) {
+          navigate('/login');
+          return;
+        }
+
+        // Fetch student profile
+        let studentData = null;
+        
+        // Try to get student by user's student ID if available
+        if (user.studentId) {
+          const response = await studentService.getStudentById(user.studentId);
+          if (response.success) {
+            studentData = response.data;
+          }
+        } else if (user.role === 'student') {
+          // Try to get the profile through the students endpoint
+          const response = await studentService.getStudents({ userId: user.id, limit: 1 });
+          if (response.success && response.data?.students?.length > 0) {
+            studentData = response.data.students[0];
+          }
+        }
+
+        if (studentData) {
+          const userData = studentData.user || {};
+          setStudent({
+            studentId: studentData.enrollmentNumber || studentData.id?.substring(0, 12) || 'N/A',
+            name: userData.name || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'Student',
+            avatar: (userData.firstName?.[0] || 'S') + (userData.lastName?.[0] || ''),
+            class: `Grade ${studentData.currentClass || ''}-${studentData.section || ''}`,
+            rollNo: studentData.rollNumber || 'N/A',
+            dateOfBirth: studentData.dateOfBirth || 'N/A',
+            gender: studentData.gender || 'N/A',
+            bloodGroup: studentData.bloodGroup || 'N/A',
+            email: userData.email || 'N/A',
+            phone: userData.phone || 'N/A',
+            address: studentData.address || userData.address || 'N/A',
+            admissionDate: studentData.admissionDate || 'N/A',
+            status: studentData.status || 'Active',
+            parent: {
+              name: studentData.parent?.user?.name || studentData.parent?.name || 'N/A',
+              relation: 'Parent/Guardian',
+              email: studentData.parent?.user?.email || 'N/A',
+              phone: studentData.parent?.user?.phone || 'N/A',
+              occupation: studentData.parent?.occupation || 'N/A'
+            }
+          });
+
+          // Fetch attendance summary
+          try {
+            const attendanceResponse = await attendanceService.getStudentAttendance(studentData.id, {
+              limit: 200
+            });
+            if (attendanceResponse.success && attendanceResponse.data?.statistics) {
+              const stats = attendanceResponse.data.statistics;
+              setAcademicStats(prev => ({
+                ...prev,
+                attendanceRate: parseFloat(stats.attendanceRate) || 0
+              }));
+            }
+          } catch (err) {
+            console.log('Attendance stats not available');
+          }
+        } else {
+          // Use logged-in user info as fallback
+          setStudent({
+            studentId: user.id?.substring(0, 12) || 'N/A',
+            name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Student',
+            avatar: (user.firstName?.[0] || 'S') + (user.lastName?.[0] || ''),
+            class: 'N/A',
+            rollNo: 'N/A',
+            dateOfBirth: 'N/A',
+            gender: 'N/A',
+            bloodGroup: 'N/A',
+            email: user.email || 'N/A',
+            phone: user.phone || 'N/A',
+            address: 'N/A',
+            admissionDate: 'N/A',
+            status: 'Active',
+            parent: {
+              name: 'N/A',
+              relation: '',
+              email: 'N/A',
+              phone: 'N/A',
+              occupation: 'N/A'
+            }
+          });
+        }
+      } catch (err) {
+        setError(err.message || 'Failed to load profile');
+        console.error('Error fetching profile:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [navigate]);
+
+  if (loading) {
+    return (
+      <div className="my-profile">
+        <div className="my-profile__loading">
+          <div className="my-profile__spinner"></div>
+          <p>Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="my-profile">
+        <div className="my-profile__error">
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="my-profile">

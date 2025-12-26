@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
 import './SponsorStudentMapping.css';
 
 const SponsorStudentMapping = () => {
@@ -8,29 +9,70 @@ const SponsorStudentMapping = () => {
   const [searchSponsor, setSearchSponsor] = useState('');
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [selectedSponsor, setSelectedSponsor] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const [students] = useState([
-    { id: 1, name: 'Emma Wilson', studentId: 'STU001', grade: 'Grade 10-A', status: 'unsponsored', avatar: null },
-    { id: 2, name: 'James Miller', studentId: 'STU002', grade: 'Grade 9-B', status: 'unsponsored', avatar: null },
-    { id: 3, name: 'Sarah Davis', studentId: 'STU003', grade: 'Grade 11-A', status: 'sponsored', sponsor: 'ABC Foundation', avatar: null },
-    { id: 4, name: 'Michael Brown', studentId: 'STU004', grade: 'Grade 8-C', status: 'unsponsored', avatar: null },
-    { id: 5, name: 'Emily Johnson', studentId: 'STU005', grade: 'Grade 10-B', status: 'sponsored', sponsor: 'XYZ Trust', avatar: null },
-    { id: 6, name: 'David Lee', studentId: 'STU006', grade: 'Grade 12-A', status: 'unsponsored', avatar: null },
-  ]);
+  const [students, setStudents] = useState([]);
+  const [sponsors, setSponsors] = useState([]);
+  const [mappings, setMappings] = useState([]);
 
-  const [sponsors] = useState([
-    { id: 1, name: 'ABC Foundation', type: 'Organization', sponsoredCount: 25, contact: 'contact@abcfoundation.org' },
-    { id: 2, name: 'XYZ Trust', type: 'Organization', sponsoredCount: 18, contact: 'info@xyztrust.com' },
-    { id: 3, name: 'John Smith', type: 'Individual', sponsoredCount: 3, contact: 'john.smith@email.com' },
-    { id: 4, name: 'Global Education Fund', type: 'Organization', sponsoredCount: 42, contact: 'support@gef.org' },
-    { id: 5, name: 'Mary Johnson', type: 'Individual', sponsoredCount: 5, contact: 'mary.j@email.com' },
-  ]);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  const [mappings] = useState([
-    { id: 1, student: 'Sarah Davis', studentId: 'STU003', sponsor: 'ABC Foundation', startDate: '2024-01-15', status: 'active' },
-    { id: 2, student: 'Emily Johnson', studentId: 'STU005', sponsor: 'XYZ Trust', startDate: '2024-02-01', status: 'active' },
-    { id: 3, student: 'Robert Chen', studentId: 'STU007', sponsor: 'John Smith', startDate: '2023-09-01', status: 'active' },
-  ]);
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Fetch students, sponsors, and mappings in parallel
+      const [studentsRes, sponsorsRes] = await Promise.all([
+        api.get('/students?limit=500'),
+        api.get('/sponsors?limit=500')
+      ]);
+
+      // Process students - filter those without active sponsorship
+      const studentsData = studentsRes.data?.students || [];
+      const formattedStudents = studentsData.map(s => ({
+        id: s.id,
+        name: `${s.firstName || ''} ${s.lastName || ''}`.trim() || s.user?.name || 'Unknown',
+        studentId: s.studentId || s.admissionNumber || `STU${String(s.id).padStart(3, '0')}`,
+        grade: s.class?.name || s.grade || 'N/A',
+        status: s.sponsor ? 'sponsored' : 'unsponsored',
+        sponsor: s.sponsor?.name || null,
+        avatar: null
+      }));
+      setStudents(formattedStudents);
+
+      // Process sponsors
+      const sponsorsData = sponsorsRes.data?.sponsors || [];
+      const formattedSponsors = sponsorsData.map(sp => ({
+        id: sp.id,
+        name: sp.name || `${sp.firstName || ''} ${sp.lastName || ''}`.trim() || 'Unknown',
+        type: sp.type || (sp.organization ? 'Organization' : 'Individual'),
+        sponsoredCount: sp.studentCount || sp.students?.length || 0,
+        contact: sp.email || sp.phone || 'N/A'
+      }));
+      setSponsors(formattedSponsors);
+
+      // Create mappings from sponsored students
+      const sponsoredStudents = formattedStudents.filter(s => s.status === 'sponsored');
+      const mappingsData = sponsoredStudents.map((s, idx) => ({
+        id: idx + 1,
+        student: s.name,
+        studentId: s.studentId,
+        sponsor: s.sponsor,
+        startDate: new Date().toISOString().split('T')[0],
+        status: 'active'
+      }));
+      setMappings(mappingsData);
+
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError('Failed to load data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredStudents = students.filter(s => 
     s.status === 'unsponsored' &&
@@ -55,14 +97,46 @@ const SponsorStudentMapping = () => {
     setSelectedSponsor(sponsor);
   };
 
-  const handleCreateMapping = () => {
+  const handleCreateMapping = async () => {
     if (selectedStudents.length > 0 && selectedSponsor) {
-      // TODO: Add API call to create mapping
-      // await api.sponsorMappings.create({ students: selectedStudents, sponsor: selectedSponsor });
-      setSelectedStudents([]);
-      setSelectedSponsor(null);
+      try {
+        // API call to create mapping
+        await api.post('/sponsors/mappings', { 
+          studentIds: selectedStudents, 
+          sponsorId: selectedSponsor.id 
+        });
+        setSelectedStudents([]);
+        setSelectedSponsor(null);
+        // Refresh data
+        fetchData();
+      } catch (err) {
+        console.error('Error creating mapping:', err);
+        setError('Failed to create mapping. Please try again.');
+      }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="sponsor-mapping">
+        <div className="sponsor-mapping__loading">
+          <div className="sponsor-mapping__spinner"></div>
+          <p>Loading sponsor and student data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="sponsor-mapping">
+        <div className="sponsor-mapping__error">
+          <p>{error}</p>
+          <button onClick={fetchData}>Try Again</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="sponsor-mapping">

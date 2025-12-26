@@ -313,6 +313,12 @@
   color: var(--bg-white);
 }
 
+.dashboard__chart-container {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md) 0;
+}
+
+/* Legacy chart styles - keeping for reference */
 .dashboard__chart-placeholder {
   height: 250px;
   display: flex;

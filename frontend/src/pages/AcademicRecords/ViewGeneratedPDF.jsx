@@ -1,27 +1,74 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './ViewGeneratedPDF.css';
+import { reportcardService } from '../../services';
 
 const ViewGeneratedPDF = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [pdfReports] = useState([
-    { id: 1, studentName: 'John Doe', grade: '9A', academicYear: '2024-2025' },
-    { id: 2, studentName: 'John Doe', grade: '9B', academicYear: '2024-2025' },
-    { id: 3, studentName: 'Jane Smith', grade: '10A', academicYear: '2024-2025' },
-    { id: 4, studentName: 'Emily Johnson', grade: '8B', academicYear: '2024-2025' },
-    { id: 5, studentName: 'Michael Brown', grade: '7A', academicYear: '2024-2025' },
-    { id: 6, studentName: 'Jessica Davis', grade: '8C', academicYear: '2024-2025' },
-    { id: 7, studentName: 'Chris Wilson', grade: '9A', academicYear: '2024-2025' },
-    { id: 8, studentName: 'Sarah Taylor', grade: '10B', academicYear: '2024-2025' },
-  ]);
+  const [pdfReports, setPdfReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handlePreview = () => {
-    // TODO: Open PDF preview
-    // window.open(`/api/reports/${id}/preview`, '_blank');
+  const fetchGeneratedReports = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await reportcardService.getReportCards({
+        status: 'generated'
+      });
+
+      if (response.success && response.data) {
+        const reports = (response.data.reportCards || response.data || []).map(report => ({
+          id: report.id,
+          studentId: report.studentId,
+          studentName: report.student ? 
+            `${report.student.firstName} ${report.student.lastName}` : 
+            report.studentName || 'Unknown Student',
+          grade: report.student?.class?.name || report.grade || 'N/A',
+          academicYear: report.academicYear || '2024-2025',
+          pdfUrl: report.pdfUrl || null,
+          createdAt: report.createdAt
+        }));
+        setPdfReports(reports);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to load generated reports');
+      console.error('Error fetching generated reports:', err);
+      setPdfReports([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchGeneratedReports();
+  }, [fetchGeneratedReports]);
+
+  const handlePreview = (id) => {
+    const report = pdfReports.find(r => r.id === id);
+    if (report?.pdfUrl) {
+      window.open(report.pdfUrl, '_blank');
+    } else {
+      window.open(`/api/report-cards/${id}/preview`, '_blank');
+    }
   };
 
-  const handleDownload = () => {
-    // TODO: Download PDF
-    // await api.reports.download(id);
+  const handleDownload = async (id) => {
+    try {
+      const report = pdfReports.find(r => r.id === id);
+      if (report?.pdfUrl) {
+        const link = document.createElement('a');
+        link.href = report.pdfUrl;
+        link.download = `report_card_${report.studentName}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        window.open(`/api/report-cards/${id}/download`, '_blank');
+      }
+    } catch (err) {
+      console.error('Error downloading report:', err);
+    }
   };
 
   const handleSendBulkEmail = () => {
@@ -37,6 +84,28 @@ const ViewGeneratedPDF = () => {
       report.academicYear.toLowerCase().includes(searchLower)
     );
   });
+
+  if (loading) {
+    return (
+      <div className="view-pdf">
+        <div className="view-pdf__loading">
+          <div className="view-pdf__spinner"></div>
+          <p>Loading generated reports...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="view-pdf">
+        <div className="view-pdf__error">
+          <p>{error}</p>
+          <button onClick={() => fetchGeneratedReports()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="view-pdf">

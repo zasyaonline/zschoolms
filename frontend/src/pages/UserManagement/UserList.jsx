@@ -1,18 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import api from '../../services/api';
 import ToggleSwitch from '../../components/common/ToggleSwitch';
 import './UserList.css';
 
 const UserList = () => {
-  const [users, setUsers] = useState([
-    { id: 1, name: 'John Doe', email: 'john.doe@example.com', role: 'Admin', mobile: '+1234567890', status: false, lastLogin: '2024-12-01' },
-    { id: 2, name: 'Jane Smith', email: 'jane.smith@example.com', role: 'Teacher', mobile: '+1234567891', status: true, lastLogin: '2024-12-10' },
-    { id: 3, name: 'Alice Johnson', email: 'alice.johnson@example.com', role: 'Student', mobile: '+1234567892', status: false, lastLogin: '2024-11-15' },
-    { id: 4, name: 'Michael Brown', email: 'michael.brown@example.com', role: 'Sponsor', mobile: '+1234567893', status: true, lastLogin: '2024-12-12' },
-    { id: 5, name: 'Emily Davis', email: 'emily.davis@example.com', role: 'Admin', mobile: '+1234567894', status: false, lastLogin: '2024-11-20' },
-    { id: 6, name: 'Chris Wilson', email: 'chris.wilson@example.com', role: 'Teacher', mobile: '+1234567895', status: true, lastLogin: '2024-12-14' },
-    { id: 7, name: 'Patricia Taylor', email: 'patricia.taylor@example.com', role: 'Student', mobile: '+1234567896', status: false, lastLogin: '2024-11-25' },
-    { id: 8, name: 'David Martinez', email: 'david.martinez@example.com', role: 'Sponsor', mobile: '+1234567897', status: true, lastLogin: '2024-12-15' },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
 
   const [searchTerm, setSearchTerm] = useState('');
   const [activeModal, setActiveModal] = useState(null); // 'add', 'edit', 'bulk'
@@ -25,15 +19,64 @@ const UserList = () => {
     status: false
   });
 
-  const handleStatusChange = (userId, newStatus) => {
-    setUsers(users.map(user => 
-      user.id === userId ? { ...user, status: newStatus } : user
-    ));
+  useEffect(() => {
+    fetchUsers();
+  }, [pagination.page]);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/users?page=${pagination.page}&limit=${pagination.limit}`);
+      if (response.success && response.data) {
+        // Map API response to component format
+        const mappedUsers = (response.data.users || []).map(user => ({
+          id: user.id,
+          name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+          email: user.email,
+          role: user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User',
+          mobile: user.phone || '',
+          status: user.isActive,
+          lastLogin: user.lastLoginAt ? new Date(user.lastLoginAt).toISOString().split('T')[0] : 'Never'
+        }));
+        setUsers(mappedUsers);
+        setPagination(prev => ({
+          ...prev,
+          total: response.data.pagination?.total || mappedUsers.length
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDelete = (userId) => {
+  const handleStatusChange = async (userId, newStatus) => {
+    try {
+      // Update locally first for immediate feedback
+      setUsers(users.map(user => 
+        user.id === userId ? { ...user, status: newStatus } : user
+      ));
+      // TODO: Add API call to update user status
+      // await api.patch(`/users/${userId}`, { isActive: newStatus });
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      // Revert on error
+      setUsers(users.map(user => 
+        user.id === userId ? { ...user, status: !newStatus } : user
+      ));
+    }
+  };
+
+  const handleDelete = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
-      setUsers(users.filter(user => user.id !== userId));
+      try {
+        // TODO: Add API call
+        // await api.delete(`/users/${userId}`);
+        setUsers(users.filter(user => user.id !== userId));
+      } catch (error) {
+        console.error('Error deleting user:', error);
+      }
     }
   };
 
@@ -149,6 +192,12 @@ const UserList = () => {
         </div>
 
         <div className="user-list__table-wrapper">
+          {loading ? (
+            <div className="user-list__loading">
+              <div className="user-list__spinner"></div>
+              <p>Loading users...</p>
+            </div>
+          ) : (
           <table className="user-list__table">
             <thead>
               <tr className="user-list__table-header">
@@ -161,7 +210,14 @@ const UserList = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
+              {users.length === 0 ? (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>No users found</td>
+                </tr>
+              ) : users.filter(user => 
+                user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.email.toLowerCase().includes(searchTerm.toLowerCase())
+              ).map((user) => (
                 <tr key={user.id} className="user-list__table-row">
                   <td>{user.name}</td>
                   <td>{user.email}</td>
@@ -205,7 +261,34 @@ const UserList = () => {
               ))}
             </tbody>
           </table>
+          )}
         </div>
+
+        {/* Pagination */}
+        {pagination.total > 0 && (
+          <div className="user-list__pagination">
+            <span className="user-list__pagination-info">
+              Showing {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)} - {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} users
+            </span>
+            <div className="user-list__pagination-buttons">
+              <button 
+                className="user-list__pagination-btn"
+                disabled={pagination.page === 1}
+                onClick={() => setPagination(p => ({ ...p, page: p.page - 1 }))}
+              >
+                ← Previous
+              </button>
+              <span className="user-list__pagination-current">Page {pagination.page}</span>
+              <button 
+                className="user-list__pagination-btn"
+                disabled={pagination.page * pagination.limit >= pagination.total}
+                onClick={() => setPagination(p => ({ ...p, page: p.page + 1 }))}
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="user-list__footer">

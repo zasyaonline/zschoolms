@@ -1,43 +1,110 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ReportCardList.css';
+import { reportcardService, studentService } from '../../services';
 
 const ReportCardList = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [showBulkModal, setShowBulkModal] = useState(false);
-  const [selectedGrade, setSelectedGrade] = useState('9A');
+  const [selectedGrade, setSelectedGrade] = useState('All');
   const [selectedTerm, setSelectedTerm] = useState('2024-2025');
-  const [reportCards, setReportCards] = useState([
-    { id: 1, studentName: 'John Doe', grade: '9A', status: 'pending', academicYear: '2024-2025' },
-    { id: 2, studentName: 'John Doe', grade: '8B', status: 'generated', academicYear: '2024-2025' },
-    { id: 3, studentName: 'Jane Smith', grade: '9C', status: 'pending', academicYear: '2024-2025' },
-    { id: 4, studentName: 'Emily Johnson', grade: '7A', status: 'generated', academicYear: '2024-2025' },
-    { id: 5, studentName: 'Michael Brown', grade: '7B', status: 'generated', academicYear: '2024-2025' },
-    { id: 6, studentName: 'Jessica Davis', grade: '8B', status: 'generated', academicYear: '2024-2025' },
-    { id: 7, studentName: 'Chris Wilson', grade: '9C', status: 'generated', academicYear: '2024-2025' },
-    { id: 8, studentName: 'Sarah Taylor', grade: '10A', status: 'generated', academicYear: '2024-2025' },
-  ]);
+  const [reportCards, setReportCards] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [bulkGenerating, setBulkGenerating] = useState(false);
 
-  const handleGenerateReport = (id) => {
-    setReportCards(reportCards.map(card => 
-      card.id === id ? { ...card, status: 'generated' } : card
-    ));
+  const fetchReportCards = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await reportcardService.getReportCards({
+        academicYear: selectedTerm
+      });
+
+      if (response.success && response.data) {
+        const cards = (response.data.reportCards || response.data || []).map(card => ({
+          id: card.id,
+          studentId: card.studentId,
+          studentName: card.student ? 
+            `${card.student.firstName} ${card.student.lastName}` : 
+            card.studentName || 'Unknown Student',
+          grade: card.student?.class?.name || card.grade || 'N/A',
+          status: card.status || 'pending',
+          academicYear: card.academicYear || selectedTerm,
+          createdAt: card.createdAt
+        }));
+        setReportCards(cards);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to load report cards');
+      console.error('Error fetching report cards:', err);
+      // Fallback to empty array
+      setReportCards([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedTerm]);
+
+  useEffect(() => {
+    fetchReportCards();
+  }, [fetchReportCards]);
+
+  const handleGenerateReport = async (id) => {
+    try {
+      const card = reportCards.find(c => c.id === id);
+      if (!card) return;
+
+      const response = await reportcardService.generateReportCard({
+        studentId: card.studentId,
+        academicYear: selectedTerm
+      });
+
+      if (response.success) {
+        setReportCards(reportCards.map(c => 
+          c.id === id ? { ...c, status: 'generated' } : c
+        ));
+      }
+    } catch (err) {
+      console.error('Error generating report:', err);
+      setError('Failed to generate report card');
+    }
   };
 
   const handleBulkGenerate = () => {
     setShowBulkModal(true);
   };
 
-  const handleConfirmBulkGenerate = () => {
-    // Generate reports for all students in selected grade and term
-    setReportCards(reportCards.map(card => 
-      (card.grade === selectedGrade || selectedGrade === 'All') && 
-      card.academicYear === selectedTerm 
-        ? { ...card, status: 'generated' } 
-        : card
-    ));
-    setShowBulkModal(false);
+  const handleConfirmBulkGenerate = async () => {
+    setBulkGenerating(true);
+    try {
+      // Get students for the selected grade
+      const studentsResponse = await studentService.getStudents({
+        grade: selectedGrade !== 'All' ? selectedGrade : undefined
+      });
+
+      if (studentsResponse.success && studentsResponse.data) {
+        const students = studentsResponse.data.students || studentsResponse.data || [];
+        const studentIds = students.map(s => s.id);
+
+        if (studentIds.length > 0) {
+          await reportcardService.bulkGenerateReportCards({
+            studentIds,
+            academicYear: selectedTerm
+          });
+
+          // Refresh the list
+          await fetchReportCards();
+        }
+      }
+      setShowBulkModal(false);
+    } catch (err) {
+      console.error('Error in bulk generation:', err);
+      setError('Failed to generate report cards in bulk');
+    } finally {
+      setBulkGenerating(false);
+    }
   };
 
   const handleCancelBulkGenerate = () => {
@@ -57,6 +124,17 @@ const ReportCardList = () => {
       card.academicYear.toLowerCase().includes(searchLower)
     );
   });
+
+  if (loading) {
+    return (
+      <div className="report-cards">
+        <div className="report-cards__loading">
+          <div className="report-cards__spinner"></div>
+          <p>Loading report cards...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="report-cards">

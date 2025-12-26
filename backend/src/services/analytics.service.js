@@ -1,5 +1,5 @@
 import { Op, fn, col, literal } from 'sequelize';
-import { Student, Attendance, Marksheet, Mark, Subject, ReportCard, Sponsor } from '../models/index.js';
+import { Student, Attendance, Marksheet, Mark, Subject, ReportCard, Sponsor, User } from '../models/index.js';
 import sequelize from '../config/database.js';
 import logger from '../utils/logger.js';
 
@@ -134,7 +134,14 @@ export const getStudentPerformanceAnalytics = async (filters = {}) => {
         {
           model: Student,
           as: 'student',
-          attributes: ['id', 'firstName', 'lastName', 'studentId']
+          attributes: ['id', 'enrollmentNumber', 'userId'],
+          include: [
+            {
+              model: User,
+              as: 'user',
+              attributes: ['id', 'firstName', 'lastName', 'email']
+            }
+          ]
         }
       ],
       order: [['percentage', 'DESC']],
@@ -195,8 +202,8 @@ export const getStudentPerformanceAnalytics = async (filters = {}) => {
       })),
       topPerformers: topPerformers.map(rp => ({
         studentId: rp.student?.id,
-        studentName: rp.student ? `${rp.student.firstName} ${rp.student.lastName}` : 'Unknown',
-        studentNumber: rp.student?.studentId,
+        studentName: rp.student?.user ? `${rp.student.user.firstName} ${rp.student.user.lastName}` : 'Unknown',
+        studentNumber: rp.student?.enrollmentNumber,
         percentage: parseFloat(rp.percentage),
         grade: rp.finalGrade,
         totalMarks: parseFloat(rp.totalMarksObtained),

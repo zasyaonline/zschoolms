@@ -1,67 +1,186 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './MyAttendance.css';
+import { attendanceService } from '../../services';
 
 const MyAttendance = () => {
   const navigate = useNavigate();
-  const [selectedMonth, setSelectedMonth] = useState('december');
-  const [selectedYear, setSelectedYear] = useState('2024');
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return now.toLocaleString('default', { month: 'long' }).toLowerCase();
+  });
+  const [selectedYear, setSelectedYear] = useState(() => {
+    return new Date().getFullYear().toString();
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [studentId, setStudentId] = useState(null);
 
-  const [stats] = useState({
-    totalDays: 180,
-    present: 165,
-    absent: 8,
-    late: 7,
-    attendanceRate: 91.7
+  const [stats, setStats] = useState({
+    totalDays: 0,
+    present: 0,
+    absent: 0,
+    late: 0,
+    attendanceRate: 0
   });
 
-  const [monthlyStats] = useState({
-    workingDays: 22,
-    present: 20,
-    absent: 1,
-    late: 1
+  const [monthlyStats, setMonthlyStats] = useState({
+    workingDays: 0,
+    present: 0,
+    absent: 0,
+    late: 0
   });
 
-  const [calendarData] = useState([
-    { date: 1, day: 'Sun', status: 'holiday' },
-    { date: 2, day: 'Mon', status: 'present' },
-    { date: 3, day: 'Tue', status: 'present' },
-    { date: 4, day: 'Wed', status: 'present' },
-    { date: 5, day: 'Thu', status: 'late' },
-    { date: 6, day: 'Fri', status: 'present' },
-    { date: 7, day: 'Sat', status: 'holiday' },
-    { date: 8, day: 'Sun', status: 'holiday' },
-    { date: 9, day: 'Mon', status: 'present' },
-    { date: 10, day: 'Tue', status: 'absent' },
-    { date: 11, day: 'Wed', status: 'present' },
-    { date: 12, day: 'Thu', status: 'present' },
-    { date: 13, day: 'Fri', status: 'present' },
-    { date: 14, day: 'Sat', status: 'holiday' },
-    { date: 15, day: 'Sun', status: 'holiday' },
-    { date: 16, day: 'Mon', status: 'present' },
-    { date: 17, day: 'Tue', status: 'present' },
-    { date: 18, day: 'Wed', status: 'present' },
-    { date: 19, day: 'Thu', status: 'present' },
-    { date: 20, day: 'Fri', status: 'present' },
-    { date: 21, day: 'Sat', status: 'holiday' },
-    { date: 22, day: 'Sun', status: 'holiday' },
-    { date: 23, day: 'Mon', status: 'present' },
-    { date: 24, day: 'Tue', status: 'present' },
-    { date: 25, day: 'Wed', status: 'holiday' },
-    { date: 26, day: 'Thu', status: 'present' },
-    { date: 27, day: 'Fri', status: 'present' },
-    { date: 28, day: 'Sat', status: 'holiday' },
-    { date: 29, day: 'Sun', status: 'holiday' },
-    { date: 30, day: 'Mon', status: 'present' },
-    { date: 31, day: 'Tue', status: 'future' },
-  ]);
+  const [calendarData, setCalendarData] = useState([]);
+  const [absenceHistory, setAbsenceHistory] = useState([]);
 
-  const [absenceHistory] = useState([
-    { date: '2024-12-10', reason: 'Sick Leave', status: 'Approved' },
-    { date: '2024-11-22', reason: 'Family Function', status: 'Approved' },
-    { date: '2024-10-15', reason: 'Medical Appointment', status: 'Approved' },
-    { date: '2024-09-05', reason: 'Not Feeling Well', status: 'Approved' },
-  ]);
+  const monthNames = ['january', 'february', 'march', 'april', 'may', 'june', 
+                      'july', 'august', 'september', 'october', 'november', 'december'];
+
+  // Get student ID from localStorage
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    
+    // Get studentId from user object
+    setStudentId(user.studentId || user.id);
+  }, [navigate]);
+
+  // Fetch attendance data
+  const fetchAttendance = useCallback(async () => {
+    if (!studentId) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Calculate date range for selected month
+      const monthIndex = monthNames.indexOf(selectedMonth);
+      const year = parseInt(selectedYear);
+      const startDate = new Date(year, monthIndex, 1);
+      const endDate = new Date(year, monthIndex + 1, 0);
+      
+      const startDateStr = startDate.toISOString().split('T')[0];
+      const endDateStr = endDate.toISOString().split('T')[0];
+
+      // Fetch monthly attendance
+      const response = await attendanceService.getStudentAttendance(studentId, {
+        startDate: startDateStr,
+        endDate: endDateStr,
+        limit: 100
+      });
+
+      if (response.success && response.data) {
+        const records = response.data.records || [];
+        const statistics = response.data.statistics || {};
+
+        // Calculate monthly stats
+        const present = records.filter(r => r.status === 'present').length;
+        const absent = records.filter(r => r.status === 'absent').length;
+        const late = records.filter(r => r.status === 'late').length;
+        const total = records.length;
+
+        setMonthlyStats({
+          workingDays: total,
+          present,
+          absent,
+          late
+        });
+
+        // Build calendar data
+        const daysInMonth = endDate.getDate();
+        const calData = [];
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+          const date = new Date(year, monthIndex, day);
+          const dateStr = date.toISOString().split('T')[0];
+          const dayOfWeek = date.getDay();
+          
+          // Check if it's a weekend (holiday)
+          const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+          
+          // Find attendance record for this date
+          const record = records.find(r => r.date === dateStr);
+          
+          let status = 'future';
+          if (date > new Date()) {
+            status = 'future';
+          } else if (isWeekend) {
+            status = 'holiday';
+          } else if (record) {
+            status = record.status;
+          } else {
+            status = 'holiday'; // Default to holiday if no record
+          }
+
+          calData.push({
+            date: day,
+            day: date.toLocaleDateString('en-US', { weekday: 'short' }),
+            status,
+            fullDate: dateStr
+          });
+        }
+
+        setCalendarData(calData);
+
+        // Set absence history
+        const absences = records
+          .filter(r => r.status === 'absent')
+          .map(r => ({
+            date: r.date,
+            reason: r.remarks || 'No reason provided',
+            status: 'Recorded'
+          }));
+        setAbsenceHistory(absences);
+
+        // Set overall stats from API
+        setStats({
+          totalDays: statistics.total || total,
+          present: statistics.present || present,
+          absent: statistics.absent || absent,
+          late: statistics.late || late,
+          attendanceRate: parseFloat(statistics.attendanceRate) || 
+            (total > 0 ? ((present / total) * 100).toFixed(1) : 0)
+        });
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to load attendance data');
+      console.error('Error fetching attendance:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [studentId, selectedMonth, selectedYear]);
+
+  useEffect(() => {
+    fetchAttendance();
+  }, [fetchAttendance]);
+
+  if (loading) {
+    return (
+      <div className="my-attendance">
+        <div className="my-attendance__loading">
+          <div className="my-attendance__spinner"></div>
+          <p>Loading attendance...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="my-attendance">
+        <div className="my-attendance__error">
+          <p>{error}</p>
+          <button onClick={() => fetchAttendance()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="my-attendance">

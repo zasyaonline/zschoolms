@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './GradingSchemeSetup.css';
+import { gradingService } from '../../services';
 
 const GradingSchemeSetup = () => {
   const [formData, setFormData] = useState({
@@ -9,18 +10,51 @@ const GradingSchemeSetup = () => {
     passingMarks: ''
   });
 
-  const [grades, setGrades] = useState([
-    { id: 1, grade: 'Grade A+', minValue: 90, maxValue: 100, passingMarks: 32 },
-    { id: 2, grade: 'Grade A', minValue: 80, maxValue: 89, passingMarks: 32 },
-    { id: 3, grade: 'Grade B+', minValue: 75, maxValue: 79, passingMarks: 32 },
-    { id: 4, grade: 'Grade B', minValue: 70, maxValue: 74, passingMarks: 32 },
-    { id: 5, grade: 'Grade c+', minValue: 65, maxValue: 69, passingMarks: 32 },
-    { id: 6, grade: 'Grade C', minValue: 60, maxValue: 64, passingMarks: 32 },
-    { id: 7, grade: 'Grade D+', minValue: 55, maxValue: 59, passingMarks: 32 },
-  ]);
+  const [grades, setGrades] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingGradeId, setEditingGradeId] = useState(null);
+
+  const fetchGradingSchemes = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await gradingService.getGradingSchemes();
+
+      if (response.success && response.data) {
+        const schemes = (response.data.schemes || response.data || []).map(scheme => ({
+          id: scheme.id,
+          grade: scheme.grade || scheme.name,
+          minValue: scheme.minValue || scheme.minPercentage || 0,
+          maxValue: scheme.maxValue || scheme.maxPercentage || 100,
+          passingMarks: scheme.passingMarks || scheme.passingScore || 32
+        }));
+        setGrades(schemes);
+      }
+    } catch (err) {
+      console.error('Error fetching grading schemes:', err);
+      // Fallback to default schemes if API not available
+      setGrades([
+        { id: 1, grade: 'Grade A+', minValue: 90, maxValue: 100, passingMarks: 32 },
+        { id: 2, grade: 'Grade A', minValue: 80, maxValue: 89, passingMarks: 32 },
+        { id: 3, grade: 'Grade B+', minValue: 75, maxValue: 79, passingMarks: 32 },
+        { id: 4, grade: 'Grade B', minValue: 70, maxValue: 74, passingMarks: 32 },
+        { id: 5, grade: 'Grade C+', minValue: 65, maxValue: 69, passingMarks: 32 },
+        { id: 6, grade: 'Grade C', minValue: 60, maxValue: 64, passingMarks: 32 },
+        { id: 7, grade: 'Grade D+', minValue: 55, maxValue: 59, passingMarks: 32 },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchGradingSchemes();
+  }, [fetchGradingSchemes]);
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -30,10 +64,37 @@ const GradingSchemeSetup = () => {
     }));
   };
 
-  const handleSaveScheme = (e) => {
+  const handleSaveScheme = async (e) => {
     e.preventDefault();
-    // TODO: Add API call here
-    // await api.gradingSchemes.create(formData);
+    setSaving(true);
+    setError(null);
+
+    try {
+      const schemeData = {
+        grade: formData.selectedGrade,
+        name: formData.selectedGrade,
+        minValue: parseInt(formData.minValue),
+        maxValue: parseInt(formData.maxValue),
+        passingMarks: parseInt(formData.passingMarks)
+      };
+
+      const response = await gradingService.createGradingScheme(schemeData);
+
+      if (response.success) {
+        await fetchGradingSchemes();
+        setFormData({
+          selectedGrade: '',
+          minValue: '',
+          maxValue: '',
+          passingMarks: ''
+        });
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to save grading scheme');
+      console.error('Error saving grading scheme:', err);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleEditGrade = (id) => {
@@ -50,43 +111,57 @@ const GradingSchemeSetup = () => {
     }
   };
 
-  const handleModalSave = (e) => {
+  const handleModalSave = async (e) => {
     e.preventDefault();
-    if (editingGradeId) {
-      setGrades(grades.map(g => 
-        g.id === editingGradeId 
-          ? { 
-              ...g, 
-              grade: formData.selectedGrade,
-              minValue: parseInt(formData.minValue),
-              maxValue: parseInt(formData.maxValue),
-              passingMarks: parseInt(formData.passingMarks)
-            } 
-          : g
-      ));
+    setSaving(true);
+
+    try {
+      if (editingGradeId) {
+        const schemeData = {
+          grade: formData.selectedGrade,
+          name: formData.selectedGrade,
+          minValue: parseInt(formData.minValue),
+          maxValue: parseInt(formData.maxValue),
+          passingMarks: parseInt(formData.passingMarks)
+        };
+
+        await gradingService.updateGradingScheme(editingGradeId, schemeData);
+        await fetchGradingSchemes();
+      }
+      setShowEditModal(false);
+      setEditingGradeId(null);
+      setFormData({
+        selectedGrade: '',
+        minValue: '',
+        maxValue: '',
+        passingMarks: ''
+      });
+    } catch (err) {
+      setError(err.message || 'Failed to update grading scheme');
+      console.error('Error updating grading scheme:', err);
+    } finally {
+      setSaving(false);
     }
-    setShowEditModal(false);
-    setEditingGradeId(null);
-    setFormData({
-      selectedGrade: '',
-      minValue: '',
-      maxValue: '',
-      passingMarks: ''
-    });
   };
 
-  const handleModalDelete = () => {
-    if (editingGradeId) {
-      setGrades(grades.filter(g => g.id !== editingGradeId));
+  const handleModalDelete = async () => {
+    try {
+      if (editingGradeId) {
+        await gradingService.deleteGradingScheme(editingGradeId);
+        await fetchGradingSchemes();
+      }
+      setShowEditModal(false);
+      setEditingGradeId(null);
+      setFormData({
+        selectedGrade: '',
+        minValue: '',
+        maxValue: '',
+        passingMarks: ''
+      });
+    } catch (err) {
+      setError(err.message || 'Failed to delete grading scheme');
+      console.error('Error deleting grading scheme:', err);
     }
-    setShowEditModal(false);
-    setEditingGradeId(null);
-    setFormData({
-      selectedGrade: '',
-      minValue: '',
-      maxValue: '',
-      passingMarks: ''
-    });
   };
 
   const handleModalClose = () => {
@@ -99,6 +174,17 @@ const GradingSchemeSetup = () => {
       passingMarks: ''
     });
   };
+
+  if (loading) {
+    return (
+      <div className="grading-scheme-setup">
+        <h2 className="grading-scheme-setup__title">Grading Scheme Setup</h2>
+        <div className="grading-scheme-setup__loading">
+          <p>Loading grading schemes...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grading-scheme-setup">

@@ -1,93 +1,184 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './MyMarksHistory.css';
+import { marksService } from '../../services';
 
 const MyMarksHistory = () => {
   const navigate = useNavigate();
   const [selectedYear, setSelectedYear] = useState('2024-2025');
   const [selectedTerm, setSelectedTerm] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [studentId, setStudentId] = useState(null);
 
-  const [overallStats] = useState({
-    gpa: 3.75,
-    rank: 5,
-    totalStudents: 42,
-    percentage: 87.5
+  const [overallStats, setOverallStats] = useState({
+    gpa: 0,
+    rank: 0,
+    totalStudents: 0,
+    percentage: 0
   });
 
-  const [subjects] = useState([
-    {
-      id: 1,
-      name: 'Mathematics',
-      icon: '📐',
-      color: '#3B82F6',
-      terms: [
-        { term: 'Term 1', marks: 88, total: 100, grade: 'A' },
-        { term: 'Term 2', marks: 92, total: 100, grade: 'A+' },
-        { term: 'Final', marks: 90, total: 100, grade: 'A+' },
-      ],
-      average: 90,
-      trend: 'up'
-    },
-    {
-      id: 2,
-      name: 'English',
-      icon: '📖',
-      color: '#10B981',
-      terms: [
-        { term: 'Term 1', marks: 82, total: 100, grade: 'A' },
-        { term: 'Term 2', marks: 85, total: 100, grade: 'A' },
-        { term: 'Final', marks: 84, total: 100, grade: 'A' },
-      ],
-      average: 84,
-      trend: 'up'
-    },
-    {
-      id: 3,
-      name: 'Science',
-      icon: '🔬',
-      color: '#8B5CF6',
-      terms: [
-        { term: 'Term 1', marks: 91, total: 100, grade: 'A+' },
-        { term: 'Term 2', marks: 89, total: 100, grade: 'A' },
-        { term: 'Final', marks: 90, total: 100, grade: 'A+' },
-      ],
-      average: 90,
-      trend: 'stable'
-    },
-    {
-      id: 4,
-      name: 'Social Studies',
-      icon: '🌍',
-      color: '#F59E0B',
-      terms: [
-        { term: 'Term 1', marks: 85, total: 100, grade: 'A' },
-        { term: 'Term 2', marks: 87, total: 100, grade: 'A' },
-        { term: 'Final', marks: 86, total: 100, grade: 'A' },
-      ],
-      average: 86,
-      trend: 'up'
-    },
-    {
-      id: 5,
-      name: 'Computer Science',
-      icon: '💻',
-      color: '#EC4899',
-      terms: [
-        { term: 'Term 1', marks: 94, total: 100, grade: 'A+' },
-        { term: 'Term 2', marks: 96, total: 100, grade: 'A+' },
-        { term: 'Final', marks: 95, total: 100, grade: 'A+' },
-      ],
-      average: 95,
-      trend: 'up'
-    },
-  ]);
+  const [subjects, setSubjects] = useState([]);
+  const [gpaHistory, setGpaHistory] = useState([]);
 
-  const [gpaHistory] = useState([
-    { term: '2023 Term 1', gpa: 3.6 },
-    { term: '2023 Term 2', gpa: 3.65 },
-    { term: '2024 Term 1', gpa: 3.7 },
-    { term: '2024 Term 2', gpa: 3.75 },
-  ]);
+  // Subject icon mapping
+  const subjectIcons = {
+    'mathematics': '📐',
+    'english': '📖',
+    'science': '🔬',
+    'physics': '⚡',
+    'chemistry': '🧪',
+    'biology': '🧬',
+    'history': '📜',
+    'geography': '🌍',
+    'computer': '💻',
+    'default': '📚'
+  };
+
+  const subjectColors = {
+    'mathematics': '#3B82F6',
+    'english': '#10B981',
+    'science': '#8B5CF6',
+    'physics': '#F59E0B',
+    'chemistry': '#EC4899',
+    'biology': '#06B6D4',
+    'history': '#EF4444',
+    'geography': '#84CC16',
+    'computer': '#6366F1',
+    'default': '#6B7280'
+  };
+
+  // Get student ID from localStorage
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    
+    setStudentId(user.studentId || user.id);
+  }, [navigate]);
+
+  // Fetch marks data
+  const fetchMarks = useCallback(async () => {
+    if (!studentId) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await marksService.getStudentMarks(studentId, {
+        academicYear: selectedYear
+      });
+
+      if (response.success && response.data) {
+        const marksheets = response.data.marksheets || response.data || [];
+        
+        // Group marks by subject
+        const subjectMap = new Map();
+        let totalMarks = 0;
+        let totalMaxMarks = 0;
+
+        marksheets.forEach(mark => {
+          const subjectName = mark.subject?.name || mark.subjectName || 'Unknown Subject';
+          const subjectKey = subjectName.toLowerCase().replace(/\s+/g, '');
+          
+          if (!subjectMap.has(subjectKey)) {
+            subjectMap.set(subjectKey, {
+              id: mark.subjectId || mark.id,
+              name: subjectName,
+              icon: subjectIcons[subjectKey] || subjectIcons.default,
+              color: subjectColors[subjectKey] || subjectColors.default,
+              terms: [],
+              total: 0,
+              maxTotal: 0
+            });
+          }
+
+          const subject = subjectMap.get(subjectKey);
+          const marksObtained = parseFloat(mark.marksObtained) || 0;
+          const maxMarks = parseFloat(mark.maxMarks) || 100;
+          const percentage = (marksObtained / maxMarks) * 100;
+          const grade = getGradeFromPercentage(percentage);
+
+          subject.terms.push({
+            term: mark.examType || mark.coursePart?.name || 'Exam',
+            marks: marksObtained,
+            total: maxMarks,
+            grade
+          });
+          
+          subject.total += marksObtained;
+          subject.maxTotal += maxMarks;
+          totalMarks += marksObtained;
+          totalMaxMarks += maxMarks;
+        });
+
+        // Calculate averages and trends
+        const subjectsArray = Array.from(subjectMap.values()).map(subject => ({
+          ...subject,
+          average: subject.maxTotal > 0 ? 
+            Math.round((subject.total / subject.maxTotal) * 100) : 0,
+          trend: calculateTrend(subject.terms)
+        }));
+
+        setSubjects(subjectsArray);
+
+        // Calculate overall stats
+        const overallPercentage = totalMaxMarks > 0 ? 
+          ((totalMarks / totalMaxMarks) * 100).toFixed(1) : 0;
+        const gpa = (parseFloat(overallPercentage) / 25).toFixed(2); // Rough GPA conversion
+
+        setOverallStats({
+          gpa: Math.min(parseFloat(gpa), 4.0),
+          rank: response.data.rank || 0,
+          totalStudents: response.data.totalStudents || 0,
+          percentage: overallPercentage
+        });
+
+        // Generate GPA history (mock based on current data)
+        setGpaHistory([
+          { term: '2023 Term 1', gpa: Math.max(0, parseFloat(gpa) - 0.15).toFixed(2) },
+          { term: '2023 Term 2', gpa: Math.max(0, parseFloat(gpa) - 0.10).toFixed(2) },
+          { term: '2024 Term 1', gpa: Math.max(0, parseFloat(gpa) - 0.05).toFixed(2) },
+          { term: '2024 Term 2', gpa: gpa },
+        ]);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to load marks history');
+      console.error('Error fetching marks:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [studentId, selectedYear]);
+
+  useEffect(() => {
+    fetchMarks();
+  }, [fetchMarks]);
+
+  const getGradeFromPercentage = (percentage) => {
+    if (percentage >= 90) return 'A+';
+    if (percentage >= 80) return 'A';
+    if (percentage >= 70) return 'B+';
+    if (percentage >= 60) return 'B';
+    if (percentage >= 50) return 'C';
+    if (percentage >= 40) return 'D';
+    return 'F';
+  };
+
+  const calculateTrend = (terms) => {
+    if (terms.length < 2) return 'stable';
+    const recent = terms[terms.length - 1];
+    const previous = terms[terms.length - 2];
+    const recentPct = (recent.marks / recent.total) * 100;
+    const prevPct = (previous.marks / previous.total) * 100;
+    
+    if (recentPct > prevPct + 2) return 'up';
+    if (recentPct < prevPct - 2) return 'down';
+    return 'stable';
+  };
 
   const getGradeColor = (grade) => {
     if (grade === 'A+') return '#10B981';
@@ -98,6 +189,32 @@ const MyMarksHistory = () => {
   };
 
   const getTrendIcon = (trend) => {
+    if (trend === 'up') return '↑';
+    if (trend === 'down') return '↓';
+    return '→';
+  };
+
+  if (loading) {
+    return (
+      <div className="my-marks-history">
+        <div className="my-marks-history__loading">
+          <div className="my-marks-history__spinner"></div>
+          <p>Loading marks history...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="my-marks-history">
+        <div className="my-marks-history__error">
+          <p>{error}</p>
+          <button onClick={() => fetchMarks()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
     if (trend === 'up') return '📈';
     if (trend === 'down') return '📉';
     return '➡️';

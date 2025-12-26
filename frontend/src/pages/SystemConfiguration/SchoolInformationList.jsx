@@ -1,11 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './SchoolInformationList.css';
+import { schoolService, studentService } from '../../services';
 
 const SchoolInformationList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingSchoolId, setEditingSchoolId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [saving, setSaving] = useState(false);
   
   const [formData, setFormData] = useState({
     studentName: '',
@@ -18,78 +22,71 @@ const SchoolInformationList = () => {
   const [studentSearchTerm, setStudentSearchTerm] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
   
-  // Mock student list for dropdown
-  const availableStudents = [
-    { id: 1, name: 'Jane Doe' },
-    { id: 2, name: 'John Smith' },
-    { id: 3, name: 'Emily Johnson' }
-  ];
+  // Student list for dropdown - loaded from API
+  const [availableStudents, setAvailableStudents] = useState([]);
 
-  const [schools, setSchools] = useState([
-    { 
-      id: 1, 
-      studentName: 'John Doe', 
-      schoolName: 'Vision Academy School',
-      grade: '9A',
-      academicYear: '2024-2025',
-      contactDetails: '+1 555-123-4567',
-      address: '3522 West Fork Street, Missoula, MT 59801'
-    },
-    { 
-      id: 2, 
-      studentName: 'Jane Smith', 
-      schoolName: 'Greenwood High',
-      grade: '9B',
-      academicYear: '2024-2025',
-      contactDetails: '+1 555-987-6543',
-      address: '1234 Oak Avenue, Springfield, IL 62701'
-    },
-    { 
-      id: 3, 
-      studentName: 'Emily Johnson', 
-      schoolName: 'Lakeside Middle School',
-      grade: '8C',
-      academicYear: '2024-2025',
-      contactDetails: '+1 555-234-5678',
-      address: '567 Maple Drive, Portland, OR 97201'
-    },
-    { 
-      id: 4, 
-      studentName: 'Michael Brown', 
-      schoolName: 'Riverdale Academy',
-      grade: '11D',
-      academicYear: '2024-2025',
-      contactDetails: '+1 555-876-5432',
-      address: '890 Pine Street, Austin, TX 78701'
-    },
-    { 
-      id: 5, 
-      studentName: 'Sarah Wilson', 
-      schoolName: 'Northview Secondary',
-      grade: '12E',
-      academicYear: '2024-2025',
-      contactDetails: '+1 555-345-6789',
-      address: '234 Elm Road, Seattle, WA 98101'
-    },
-    { 
-      id: 6, 
-      studentName: 'David Lee', 
-      schoolName: 'Hillside College',
-      grade: '11B',
-      academicYear: '2024-2025',
-      contactDetails: '+1 555-654-3210',
-      address: '456 Cedar Lane, Denver, CO 80201'
-    },
-    { 
-      id: 7, 
-      studentName: 'Anna Martinez', 
-      schoolName: 'Sunset High School',
-      grade: '12A',
-      academicYear: '2024-2025',
-      contactDetails: '+1 555-456-7890',
-      address: '789 Birch Boulevard, Miami, FL 33101'
+  const [schools, setSchools] = useState([]);
+
+  const fetchSchools = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await schoolService.getSchools();
+
+      if (response.success && response.data) {
+        const schoolList = (response.data.schools || response.data || []).map(school => ({
+          id: school.id,
+          studentName: school.student ? 
+            `${school.student.firstName} ${school.student.lastName}` : 
+            school.studentName || 'N/A',
+          schoolName: school.name || school.schoolName,
+          grade: school.student?.class?.name || school.grade || 'N/A',
+          academicYear: school.academicYear || '2024-2025',
+          contactDetails: school.contactDetails || school.phone || 'N/A',
+          address: school.address || 'N/A'
+        }));
+        setSchools(schoolList);
+      }
+    } catch (err) {
+      console.error('Error fetching schools:', err);
+      // Fallback to default data if API not available
+      setSchools([
+        { 
+          id: 1, 
+          studentName: 'John Doe', 
+          schoolName: 'Vision Academy School',
+          grade: '9A',
+          academicYear: '2024-2025',
+          contactDetails: '+1 555-123-4567',
+          address: '3522 West Fork Street, Missoula, MT 59801'
+        }
+      ]);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  }, []);
+
+  const fetchStudents = useCallback(async () => {
+    try {
+      const response = await studentService.getStudents();
+      if (response.success && response.data) {
+        const students = (response.data.students || response.data || []).map(s => ({
+          id: s.id,
+          name: `${s.firstName} ${s.lastName}`
+        }));
+        setAvailableStudents(students);
+      }
+    } catch (err) {
+      console.error('Error fetching students:', err);
+      setAvailableStudents([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSchools();
+    fetchStudents();
+  }, [fetchSchools, fetchStudents]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);

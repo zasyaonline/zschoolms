@@ -1,0 +1,413 @@
+/* ============================================
+   Sponsor Dashboard Page Styles
+   ============================================ */
+
+.sponsor-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl, 24px);
+  padding: var(--spacing-lg, 20px);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Loading State */
+.sponsor-dashboard__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: var(--spacing-md, 16px);
+  color: var(--text-secondary, #666);
+}
+
+.sponsor-dashboard__spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--primary-color, #2196F3);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error State */
+.sponsor-dashboard__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: var(--spacing-md, 16px);
+  text-align: center;
+  color: var(--text-secondary, #666);
+}
+
+.sponsor-dashboard__error-icon {
+  font-size: 48px;
+}
+
+.sponsor-dashboard__error h3 {
+  margin: 0;
+  color: var(--text-primary, #1a1a1a);
+}
+
+/* Header */
+.sponsor-dashboard__header {
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.sponsor-dashboard__title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary, #1a1a1a);
+  margin: 0;
+}
+
+.sponsor-dashboard__subtitle {
+  font-size: 14px;
+  color: var(--text-secondary, #666);
+  margin: var(--spacing-xs, 4px) 0 0;
+}
+
+/* Stats Cards */
+.sponsor-dashboard__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md, 16px);
+}
+
+.sponsor-dashboard__stat-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md, 16px);
+  padding: var(--spacing-lg, 20px);
+  background: var(--bg-white, #fff);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.sponsor-dashboard__stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.sponsor-dashboard__stat-card--primary {
+  border-left: 4px solid var(--primary-color, #2196F3);
+}
+
+.sponsor-dashboard__stat-card--success {
+  border-left: 4px solid #4CAF50;
+}
+
+.sponsor-dashboard__stat-card--warning {
+  border-left: 4px solid #FF9800;
+}
+
+.sponsor-dashboard__stat-card--neutral {
+  border-left: 4px solid #9E9E9E;
+}
+
+.sponsor-dashboard__stat-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.sponsor-dashboard__stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.sponsor-dashboard__stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary, #1a1a1a);
+  line-height: 1.2;
+}
+
+.sponsor-dashboard__stat-label {
+  font-size: 14px;
+  color: var(--text-secondary, #666);
+}
+
+/* Section */
+.sponsor-dashboard__section {
+  background: var(--bg-white, #fff);
+  border-radius: 12px;
+  padding: var(--spacing-lg, 20px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.sponsor-dashboard__section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg, 20px);
+}
+
+.sponsor-dashboard__section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary, #1a1a1a);
+  margin: 0;
+}
+
+/* Empty State */
+.sponsor-dashboard__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl, 48px);
+  text-align: center;
+  color: var(--text-secondary, #666);
+}
+
+.sponsor-dashboard__empty-icon {
+  font-size: 48px;
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.sponsor-dashboard__empty h3 {
+  margin: 0 0 var(--spacing-xs, 4px);
+  color: var(--text-primary, #1a1a1a);
+}
+
+/* Students Grid */
+.sponsor-dashboard__students-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-md, 16px);
+}
+
+/* Student Card */
+.sponsor-dashboard__student-card {
+  background: var(--bg-secondary, #f8f9fa);
+  border-radius: 10px;
+  padding: var(--spacing-md, 16px);
+  transition: box-shadow 0.2s;
+}
+
+.sponsor-dashboard__student-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.sponsor-dashboard__student-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 12px);
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.sponsor-dashboard__student-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color, #2196F3), #60A5FA);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.sponsor-dashboard__student-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sponsor-dashboard__student-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #1a1a1a);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sponsor-dashboard__student-class {
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+  margin: 2px 0 0;
+}
+
+/* Badge */
+.sponsor-dashboard__badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+  flex-shrink: 0;
+}
+
+.sponsor-dashboard__badge--success {
+  background: #E8F5E9;
+  color: #2E7D32;
+}
+
+.sponsor-dashboard__badge--warning {
+  background: #FFF3E0;
+  color: #E65100;
+}
+
+.sponsor-dashboard__badge--danger {
+  background: #FFEBEE;
+  color: #C62828;
+}
+
+.sponsor-dashboard__badge--default {
+  background: #ECEFF1;
+  color: #546E7A;
+}
+
+/* Student Details */
+.sponsor-dashboard__student-details {
+  border-top: 1px solid #e0e0e0;
+  padding-top: var(--spacing-sm, 12px);
+  margin-bottom: var(--spacing-sm, 12px);
+}
+
+.sponsor-dashboard__detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 4px 0;
+}
+
+.sponsor-dashboard__detail-label {
+  color: var(--text-secondary, #666);
+}
+
+.sponsor-dashboard__detail-value {
+  color: var(--text-primary, #1a1a1a);
+  font-weight: 500;
+}
+
+/* Student Actions */
+.sponsor-dashboard__student-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--spacing-xs, 8px);
+}
+
+/* Notice */
+.sponsor-dashboard__notice {
+  display: flex;
+  gap: var(--spacing-md, 16px);
+  padding: var(--spacing-lg, 20px);
+  background: #E3F2FD;
+  border-radius: 10px;
+  border-left: 4px solid var(--primary-color, #2196F3);
+}
+
+.sponsor-dashboard__notice-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.sponsor-dashboard__notice-content h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #1a1a1a);
+  margin: 0 0 var(--spacing-xs, 4px);
+}
+
+.sponsor-dashboard__notice-content p {
+  font-size: 14px;
+  color: var(--text-secondary, #666);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Buttons */
+.btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: var(--primary-color, #2196F3);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #1976D2;
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary-color, #2196F3);
+  border: 1px solid var(--primary-color, #2196F3);
+}
+
+.btn-outline:hover {
+  background: rgba(33, 150, 243, 0.1);
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sponsor-dashboard {
+    padding: var(--spacing-md, 16px);
+  }
+
+  .sponsor-dashboard__title {
+    font-size: 24px;
+  }
+
+  .sponsor-dashboard__stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sponsor-dashboard__students-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sponsor-dashboard__section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm, 12px);
+  }
+
+  .sponsor-dashboard__notice {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .sponsor-dashboard__stats {
+    grid-template-columns: 1fr;
+  }
+
+  .sponsor-dashboard__stat-card {
+    padding: var(--spacing-md, 16px);
+  }
+
+  .sponsor-dashboard__stat-value {
+    font-size: 24px;
+  }
+}

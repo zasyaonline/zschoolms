@@ -105,6 +105,47 @@ const Marksheet = sequelize.define('Marksheet', {
     type: DataTypes.DATE,
     field: 'modified_at',
     defaultValue: DataTypes.NOW
+  },
+  // Workflow fields
+  rejectionComments: {
+    type: DataTypes.TEXT,
+    field: 'rejection_comments',
+    allowNull: true
+  },
+  submittedBy: {
+    type: DataTypes.UUID,
+    field: 'submitted_by',
+    allowNull: true
+  },
+  submittedAt: {
+    type: DataTypes.DATE,
+    field: 'submitted_at',
+    allowNull: true
+  },
+  approvedBy: {
+    type: DataTypes.UUID,
+    field: 'approved_by',
+    allowNull: true
+  },
+  approvedAt: {
+    type: DataTypes.DATE,
+    field: 'approved_at',
+    allowNull: true
+  },
+  maxMarks: {
+    type: DataTypes.DECIMAL(5, 2),
+    field: 'max_marks',
+    defaultValue: 100.00
+  },
+  isLocked: {
+    type: DataTypes.BOOLEAN,
+    field: 'is_locked',
+    defaultValue: false
+  },
+  lastAutoSave: {
+    type: DataTypes.DATE,
+    field: 'last_auto_save',
+    allowNull: true
   }
 }, {
   tableName: 'marksheets',
@@ -171,12 +212,13 @@ Marksheet.prototype.isRejected = function() {
  * @returns {boolean}
  */
 Marksheet.prototype.canEdit = function() {
+  if (this.isLocked) return false;
   return this.status === 'Draft' || this.status === 'rejected';
 };
 
 /**
  * Submit marksheet for approval
- * @param {string} submittedBy - User who submitted
+ * @param {string} submittedBy - User ID who submitted
  * @returns {Promise<Marksheet>}
  */
 Marksheet.prototype.submit = async function(submittedBy) {
@@ -185,15 +227,18 @@ Marksheet.prototype.submit = async function(submittedBy) {
   }
   
   this.status = 'submitted';
+  this.submittedBy = submittedBy;
+  this.submittedAt = new Date();
   this.modifiedBy = submittedBy;
   this.modifiedAt = new Date();
+  this.rejectionComments = null; // Clear previous rejection comments
   
   return await this.save();
 };
 
 /**
  * Approve marksheet
- * @param {string} reviewedBy - User who approved
+ * @param {string} reviewedBy - User ID who approved
  * @returns {Promise<Marksheet>}
  */
 Marksheet.prototype.approve = async function(reviewedBy) {
@@ -202,6 +247,9 @@ Marksheet.prototype.approve = async function(reviewedBy) {
   }
   
   this.status = 'approved';
+  this.approvedBy = reviewedBy;
+  this.approvedAt = new Date();
+  this.isLocked = true; // Lock after approval
   this.modifiedBy = reviewedBy;
   this.modifiedAt = new Date();
   
@@ -210,17 +258,19 @@ Marksheet.prototype.approve = async function(reviewedBy) {
 
 /**
  * Reject marksheet
- * @param {string} reviewedBy - User who rejected
- * @param {string} reason - Rejection reason
+ * @param {string} reviewedBy - User ID who rejected
+ * @param {string} comments - Rejection comments
  * @returns {Promise<Marksheet>}
  */
-Marksheet.prototype.reject = async function(reviewedBy, reason) {
+Marksheet.prototype.reject = async function(reviewedBy, comments) {
   if (this.status !== 'submitted') {
     throw new Error('Can only reject submitted marksheets');
   }
   
   this.status = 'rejected';
-  this.remarks = reason;
+  this.rejectionComments = comments;
+  this.approvedBy = reviewedBy; // Track who rejected
+  this.approvedAt = new Date();
   this.modifiedBy = reviewedBy;
   this.modifiedAt = new Date();
   

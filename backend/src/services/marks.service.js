@@ -1,7 +1,8 @@
 import { Op } from 'sequelize';
-import { Marksheet, Mark, Subject, Student, User, AuditLog } from '../models/index.js';
+import { Marksheet, Mark, Subject, Student, User, AuditLog, Teacher, ClassSection } from '../models/index.js';
 import logger from '../utils/logger.js';
 import sequelize from '../config/database.js';
+import * as notificationService from './notification.service.js';
 
 /**
  * Marks Service
@@ -123,6 +124,143 @@ export const enterMarks = async (marksData, userId) => {
     logger.error('Error entering marks:', error);
     throw error;
   }
+};
+
+/**
+ * Auto-save draft marks (lightweight save for periodic auto-save)
+ * @param {Object} draftData - Draft marks data
+ * @param {string} userId - User ID performing the save
+ * @returns {Promise<Object>} Saved draft status
+ */
+export const autoSaveDraft = async (draftData, userId) => {
+  const transaction = await sequelize.transaction();
+  
+  try {
+    const {
+      marksheetId,
+      coursePartId,
+      academicYearId,
+      academicYearEnrollmentId,
+      studentSubjectEnrollmentId,
+      subjectId,
+      schoolId,
+      marksObtained,
+      maxMarks = 100,
+      marks, // Array of individual marks
+      remarks
+    } = draftData;
+    
+    let marksheet;
+    
+    if (marksheetId) {
+      // Update existing draft
+      marksheet = await Marksheet.findByPk(marksheetId, { transaction });
+      
+      if (!marksheet) {
+        throw new Error('Marksheet not found');
+      }
+      
+      if (!marksheet.canEdit()) {
+        throw new Error('Cannot auto-save: marksheet is locked or not in editable state');
+      }
+      
+      await marksheet.update({
+        marksObtained: marksObtained ?? marksheet.marksObtained,
+        maxMarks: maxMarks ?? marksheet.maxMarks,
+        remarks: remarks ?? marksheet.remarks,
+        lastAutoSave: new Date(),
+        modifiedBy: userId,
+        modifiedAt: new Date()
+      }, { transaction });
+    } else {
+      // Create new draft
+      marksheet = await Marksheet.create({
+        coursePartId,
+        academicYearId,
+        academicYearEnrollmentId,
+        studentSubjectEnrollmentId,
+        subjectId,
+        schoolId,
+        marksObtained: marksObtained || 0,
+        maxMarks: maxMarks || 100,
+        remarks,
+        status: 'Draft',
+        lastAutoSave: new Date(),
+        createdBy: userId,
+        modifiedBy: userId
+      }, { transaction });
+    }
+    
+    // Save individual marks if provided
+    if (marks && Array.isArray(marks) && marks.length > 0) {
+      await Mark.bulkUpsert(marksheet.id, marks);
+    }
+    
+    await transaction.commit();
+    
+    logger.info(`Auto-save completed for marksheet ${marksheet.id} by user ${userId}`);
+    
+    return {
+      success: true,
+      marksheetId: marksheet.id,
+      lastAutoSave: marksheet.lastAutoSave,
+      status: marksheet.status
+    };
+  } catch (error) {
+    await transaction.rollback();
+    logger.error('Error auto-saving draft:', error);
+    throw error;
+  }
+};
+
+/**
+ * Validate marks before submission
+ * @param {Object} validationData - Marks to validate
+ * @returns {Object} Validation result with errors if any
+ */
+export const validateMarks = async (validationData) => {
+  const { marksObtained, maxMarks = 100, marks } = validationData;
+  
+  const errors = [];
+  const warnings = [];
+  
+  // Validate main marks obtained
+  if (marksObtained !== undefined) {
+    if (marksObtained < 0) {
+      errors.push({ field: 'marksObtained', message: 'Marks cannot be negative' });
+    }
+    if (marksObtained > maxMarks) {
+      errors.push({ field: 'marksObtained', message: `Marks cannot exceed maximum (${maxMarks})` });
+    }
+  }
+  
+  // Validate individual marks
+  if (marks && Array.isArray(marks)) {
+    marks.forEach((mark, index) => {
+      const markMax = mark.maxMarks || 100;
+      
+      if (mark.marksObtained < 0) {
+        errors.push({ 
+          field: `marks[${index}].marksObtained`, 
+          message: 'Marks cannot be negative',
+          subjectId: mark.subjectId 
+        });
+      }
+      if (mark.marksObtained > markMax) {
+        errors.push({ 
+          field: `marks[${index}].marksObtained`, 
+          message: `Marks cannot exceed maximum (${markMax})`,
+          subjectId: mark.subjectId 
+        });
+      }
+    });
+  }
+  
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings
+  };
 };
 
 /**
@@ -305,13 +443,20 @@ export const getMarksheetById = async (marksheetId) => {
  * Approve marksheet
  * @param {string} marksheetId - Marksheet UUID
  * @param {string} reviewerId - User ID of reviewer (principal/admin)
+ * @param {Object} options - Additional options (ipAddress)
  * @returns {Promise<Object>} Approved marksheet
  */
-export const approveMarksheet = async (marksheetId, reviewerId) => {
+export const approveMarksheet = async (marksheetId, reviewerId, options = {}) => {
   const transaction = await sequelize.transaction();
+  const { ipAddress } = options;
   
   try {
-    const marksheet = await Marksheet.findByPk(marksheetId, { transaction });
+    const marksheet = await Marksheet.findByPk(marksheetId, { 
+      transaction,
+      include: [
+        { model: Subject, as: 'subject', attributes: ['id', 'name'] }
+      ]
+    });
     
     if (!marksheet) {
       throw new Error('Marksheet not found');
@@ -324,26 +469,60 @@ export const approveMarksheet = async (marksheetId, reviewerId) => {
     // Approve the marksheet
     await marksheet.update({
       status: 'approved',
+      approvedBy: reviewerId,
+      approvedAt: new Date(),
+      isLocked: true,
       modifiedBy: reviewerId,
       modifiedAt: new Date()
     }, { transaction });
     
-    // Create audit log
+    // Create audit log with IP address
     await AuditLog.create({
       userId: reviewerId,
       action: 'APPROVE',
       entityType: 'marksheet',
       entityId: marksheet.id,
+      ipAddress: ipAddress || null,
       details: {
         previousStatus: 'submitted',
         newStatus: 'approved',
-        subjectId: marksheet.subjectId
+        subjectId: marksheet.subjectId,
+        ipAddress: ipAddress || 'unknown'
       }
     }, { transaction });
     
     await transaction.commit();
     
     logger.info(`Marksheet ${marksheetId} approved by user ${reviewerId}`);
+    
+    // Send notification to teacher (non-blocking)
+    try {
+      // Only notify if we know who submitted it
+      if (marksheet.submittedBy) {
+        const approver = await User.findByPk(reviewerId, { attributes: ['id', 'firstName', 'lastName'] });
+        const approverName = approver ? `${approver.firstName} ${approver.lastName}` : 'Principal';
+        const subjectName = marksheet.subject?.name || 'Subject';
+        
+        // Try to get class name from marksheet context
+        let className = 'Class';
+        if (marksheet.classSectionId) {
+          const classSection = await ClassSection.findByPk(marksheet.classSectionId);
+          className = classSection ? classSection.getDisplayName() : 'Class';
+        }
+        
+        await notificationService.notifyMarksApproved({
+          teacherUserId: marksheet.submittedBy,
+          className,
+          subjectName,
+          marksheetId,
+          approverName
+        });
+        logger.info(`Approval notification sent to teacher ${marksheet.submittedBy}`);
+      }
+    } catch (notifyError) {
+      // Don't fail the approval if notification fails
+      logger.warn(`Failed to send approval notification: ${notifyError.message}`);
+    }
     
     // Return complete marksheet
     return await getMarksheetById(marksheetId);
@@ -359,13 +538,20 @@ export const approveMarksheet = async (marksheetId, reviewerId) => {
  * @param {string} marksheetId - Marksheet UUID
  * @param {string} reviewerId - User ID of reviewer (principal/admin)
  * @param {string} reason - Rejection reason
+ * @param {Object} options - Additional options (ipAddress)
  * @returns {Promise<Object>} Rejected marksheet
  */
-export const rejectMarksheet = async (marksheetId, reviewerId, reason) => {
+export const rejectMarksheet = async (marksheetId, reviewerId, reason, options = {}) => {
   const transaction = await sequelize.transaction();
+  const { ipAddress } = options;
   
   try {
-    const marksheet = await Marksheet.findByPk(marksheetId, { transaction });
+    const marksheet = await Marksheet.findByPk(marksheetId, { 
+      transaction,
+      include: [
+        { model: Subject, as: 'subject', attributes: ['id', 'name'] }
+      ]
+    });
     
     if (!marksheet) {
       throw new Error('Marksheet not found');
@@ -383,27 +569,62 @@ export const rejectMarksheet = async (marksheetId, reviewerId, reason) => {
     await marksheet.update({
       status: 'rejected',
       remarks: reason,
+      rejectionComments: reason,
+      approvedBy: reviewerId,
+      approvedAt: new Date(),
       modifiedBy: reviewerId,
       modifiedAt: new Date()
     }, { transaction });
     
-    // Create audit log
+    // Create audit log with IP address
     await AuditLog.create({
       userId: reviewerId,
       action: 'REJECT',
       entityType: 'marksheet',
       entityId: marksheet.id,
+      ipAddress: ipAddress || null,
       details: {
         previousStatus: 'submitted',
         newStatus: 'rejected',
         reason,
-        subjectId: marksheet.subjectId
+        subjectId: marksheet.subjectId,
+        ipAddress: ipAddress || 'unknown'
       }
     }, { transaction });
     
     await transaction.commit();
     
     logger.info(`Marksheet ${marksheetId} rejected by user ${reviewerId}`);
+    
+    // Send notification to teacher (non-blocking)
+    try {
+      // Only notify if we know who submitted it
+      if (marksheet.submittedBy) {
+        const rejector = await User.findByPk(reviewerId, { attributes: ['id', 'firstName', 'lastName'] });
+        const rejectorName = rejector ? `${rejector.firstName} ${rejector.lastName}` : 'Principal';
+        const subjectName = marksheet.subject?.name || 'Subject';
+        
+        // Try to get class name from marksheet context
+        let className = 'Class';
+        if (marksheet.classSectionId) {
+          const classSection = await ClassSection.findByPk(marksheet.classSectionId);
+          className = classSection ? classSection.getDisplayName() : 'Class';
+        }
+        
+        await notificationService.notifyMarksRejected({
+          teacherUserId: marksheet.submittedBy,
+          className,
+          subjectName,
+          marksheetId,
+          rejectionComments: reason,
+          rejectorName
+        });
+        logger.info(`Rejection notification sent to teacher ${marksheet.submittedBy}`);
+      }
+    } catch (notifyError) {
+      // Don't fail the rejection if notification fails
+      logger.warn(`Failed to send rejection notification: ${notifyError.message}`);
+    }
     
     // Return complete marksheet
     return await getMarksheetById(marksheetId);
@@ -424,7 +645,12 @@ export const submitMarksheet = async (marksheetId, userId) => {
   const transaction = await sequelize.transaction();
   
   try {
-    const marksheet = await Marksheet.findByPk(marksheetId, { transaction });
+    const marksheet = await Marksheet.findByPk(marksheetId, { 
+      transaction,
+      include: [
+        { model: Subject, as: 'subject', attributes: ['id', 'name'] }
+      ]
+    });
     
     if (!marksheet) {
       throw new Error('Marksheet not found');
@@ -443,6 +669,8 @@ export const submitMarksheet = async (marksheetId, userId) => {
     // Submit the marksheet
     await marksheet.update({
       status: 'submitted',
+      submittedBy: userId,
+      submittedAt: new Date(),
       modifiedBy: userId,
       modifiedAt: new Date()
     }, { transaction });
@@ -464,6 +692,32 @@ export const submitMarksheet = async (marksheetId, userId) => {
     await transaction.commit();
     
     logger.info(`Marksheet ${marksheetId} submitted by user ${userId}`);
+    
+    // Send notification to principals (non-blocking)
+    try {
+      const submitter = await User.findByPk(userId, { attributes: ['id', 'firstName', 'lastName'] });
+      const teacherName = submitter ? `${submitter.firstName} ${submitter.lastName}` : 'Teacher';
+      const subjectName = marksheet.subject?.name || 'Subject';
+      
+      // Try to get class name from marksheet context
+      let className = 'Class';
+      if (marksheet.classSectionId) {
+        const classSection = await ClassSection.findByPk(marksheet.classSectionId);
+        className = classSection ? classSection.getDisplayName() : 'Class';
+      }
+      
+      await notificationService.notifyMarksSubmitted({
+        schoolId: marksheet.schoolId,
+        teacherName,
+        className,
+        subjectName,
+        marksheetId
+      });
+      logger.info(`Notification sent to principals for marksheet ${marksheetId} submission`);
+    } catch (notifyError) {
+      // Don't fail the submission if notification fails
+      logger.warn(`Failed to send submission notification: ${notifyError.message}`);
+    }
     
     // Return complete marksheet
     return await getMarksheetById(marksheetId);
@@ -591,6 +845,212 @@ export const getStudentMarksheets = async (enrollmentId) => {
   }
 };
 
+/**
+ * Get detailed statistics for a marksheet (for principal review)
+ * Includes class average, highest/lowest scores, and anomaly detection
+ * @param {string} marksheetId - Marksheet UUID
+ * @returns {Promise<Object>} Detailed statistics
+ */
+export const getMarksheetStatistics = async (marksheetId) => {
+  try {
+    const marksheet = await Marksheet.findByPk(marksheetId, {
+      include: [
+        { model: Subject, as: 'subject', attributes: ['id', 'name'] },
+        { 
+          model: Mark, 
+          as: 'marks',
+          include: [
+            { model: Student, as: 'student', attributes: ['id', 'firstName', 'lastName', 'enrollmentNumber'] }
+          ]
+        }
+      ]
+    });
+
+    if (!marksheet) {
+      throw new Error('Marksheet not found');
+    }
+
+    const marks = marksheet.marks || [];
+    
+    if (marks.length === 0) {
+      return {
+        marksheet: {
+          id: marksheet.id,
+          status: marksheet.status,
+          subject: marksheet.subject
+        },
+        statistics: {
+          totalStudents: 0,
+          classAverage: 0,
+          highest: null,
+          lowest: null,
+          median: 0,
+          passRate: 0,
+          gradeDistribution: {}
+        },
+        anomalies: [],
+        summary: 'No marks entered yet'
+      };
+    }
+
+    // Calculate statistics
+    const marksObtained = marks.map(m => m.marksObtained || 0);
+    const maxMarks = marks[0]?.maxMarks || 100;
+    
+    // Sort for calculations
+    const sortedMarks = [...marksObtained].sort((a, b) => a - b);
+    
+    const totalStudents = marks.length;
+    const sum = marksObtained.reduce((acc, m) => acc + m, 0);
+    const classAverage = totalStudents > 0 ? (sum / totalStudents).toFixed(2) : 0;
+    
+    // Highest and lowest with student info
+    const highestMark = Math.max(...marksObtained);
+    const lowestMark = Math.min(...marksObtained);
+    
+    const highestStudent = marks.find(m => m.marksObtained === highestMark);
+    const lowestStudent = marks.find(m => m.marksObtained === lowestMark);
+    
+    // Median
+    const midIndex = Math.floor(sortedMarks.length / 2);
+    const median = sortedMarks.length % 2 !== 0
+      ? sortedMarks[midIndex]
+      : (sortedMarks[midIndex - 1] + sortedMarks[midIndex]) / 2;
+    
+    // Pass rate (assuming 40% pass mark)
+    const passMark = maxMarks * 0.4;
+    const passCount = marksObtained.filter(m => m >= passMark).length;
+    const passRate = ((passCount / totalStudents) * 100).toFixed(1);
+    
+    // Grade distribution
+    const gradeDistribution = {
+      A: 0, // 80-100%
+      B: 0, // 60-79%
+      C: 0, // 50-59%
+      D: 0, // 40-49%
+      F: 0  // Below 40%
+    };
+    
+    marksObtained.forEach(m => {
+      const percentage = (m / maxMarks) * 100;
+      if (percentage >= 80) gradeDistribution.A++;
+      else if (percentage >= 60) gradeDistribution.B++;
+      else if (percentage >= 50) gradeDistribution.C++;
+      else if (percentage >= 40) gradeDistribution.D++;
+      else gradeDistribution.F++;
+    });
+    
+    // Anomaly detection
+    const anomalies = [];
+    
+    // Check for zero marks
+    const zeroMarks = marks.filter(m => m.marksObtained === 0);
+    if (zeroMarks.length > 0) {
+      anomalies.push({
+        type: 'zero_marks',
+        severity: 'warning',
+        message: `${zeroMarks.length} student(s) have zero marks`,
+        students: zeroMarks.map(m => ({
+          id: m.student?.id,
+          name: m.student ? `${m.student.firstName} ${m.student.lastName}` : 'Unknown',
+          enrollmentNumber: m.student?.enrollmentNumber
+        }))
+      });
+    }
+    
+    // Check for perfect scores (might need verification)
+    const perfectScores = marks.filter(m => m.marksObtained === maxMarks);
+    if (perfectScores.length > 0) {
+      anomalies.push({
+        type: 'perfect_score',
+        severity: 'info',
+        message: `${perfectScores.length} student(s) have perfect scores`,
+        students: perfectScores.map(m => ({
+          id: m.student?.id,
+          name: m.student ? `${m.student.firstName} ${m.student.lastName}` : 'Unknown',
+          enrollmentNumber: m.student?.enrollmentNumber
+        }))
+      });
+    }
+    
+    // Check for unusually high failure rate
+    if (parseFloat(passRate) < 50) {
+      anomalies.push({
+        type: 'high_failure_rate',
+        severity: 'critical',
+        message: `High failure rate: ${100 - parseFloat(passRate)}% of students failed`,
+        recommendation: 'Consider reviewing the assessment difficulty or providing additional support'
+      });
+    }
+    
+    // Check for outliers (marks significantly below class average)
+    const stdDev = Math.sqrt(
+      marksObtained.reduce((acc, m) => acc + Math.pow(m - parseFloat(classAverage), 2), 0) / totalStudents
+    );
+    
+    const outlierThreshold = parseFloat(classAverage) - (2 * stdDev);
+    const outliers = marks.filter(m => m.marksObtained < outlierThreshold && m.marksObtained > 0);
+    
+    if (outliers.length > 0) {
+      anomalies.push({
+        type: 'outliers',
+        severity: 'warning',
+        message: `${outliers.length} student(s) have marks significantly below class average`,
+        students: outliers.map(m => ({
+          id: m.student?.id,
+          name: m.student ? `${m.student.firstName} ${m.student.lastName}` : 'Unknown',
+          marks: m.marksObtained,
+          enrollmentNumber: m.student?.enrollmentNumber
+        }))
+      });
+    }
+
+    return {
+      marksheet: {
+        id: marksheet.id,
+        status: marksheet.status,
+        subject: marksheet.subject,
+        submittedAt: marksheet.submittedAt,
+        submittedBy: marksheet.submittedBy
+      },
+      statistics: {
+        totalStudents,
+        classAverage: parseFloat(classAverage),
+        highest: {
+          marks: highestMark,
+          student: highestStudent?.student ? {
+            id: highestStudent.student.id,
+            name: `${highestStudent.student.firstName} ${highestStudent.student.lastName}`,
+            enrollmentNumber: highestStudent.student.enrollmentNumber
+          } : null
+        },
+        lowest: {
+          marks: lowestMark,
+          student: lowestStudent?.student ? {
+            id: lowestStudent.student.id,
+            name: `${lowestStudent.student.firstName} ${lowestStudent.student.lastName}`,
+            enrollmentNumber: lowestStudent.student.enrollmentNumber
+          } : null
+        },
+        median,
+        standardDeviation: stdDev.toFixed(2),
+        passRate: parseFloat(passRate),
+        maxMarks,
+        gradeDistribution
+      },
+      anomalies,
+      hasAnomalies: anomalies.length > 0,
+      criticalAnomalies: anomalies.filter(a => a.severity === 'critical').length,
+      summary: anomalies.length > 0 
+        ? `Found ${anomalies.length} issue(s) requiring attention`
+        : 'No anomalies detected'
+    };
+  } catch (error) {
+    logger.error('Error getting marksheet statistics:', error);
+    throw error;
+  }
+};
+
 export default {
   enterMarks,
   getPendingMarksheets,
@@ -601,5 +1061,6 @@ export default {
   submitMarksheet,
   deleteMarksheet,
   getSubjectStatistics,
-  getStudentMarksheets
+  getStudentMarksheets,
+  getMarksheetStatistics
 };

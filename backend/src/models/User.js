@@ -61,13 +61,13 @@ const User = sequelize.define('User', {
     },
   },
   role: {
-    type: DataTypes.ENUM('admin', 'teacher', 'student', 'parent', 'staff'),
+    type: DataTypes.ENUM('super_admin', 'principal', 'admin', 'teacher', 'student', 'parent', 'staff', 'sponsor'),
     allowNull: false,
     defaultValue: 'student',
     validate: {
       isIn: {
-        args: [['admin', 'teacher', 'student', 'parent', 'staff']],
-        msg: 'Invalid role',
+        args: [['super_admin', 'principal', 'admin', 'teacher', 'student', 'parent', 'staff', 'sponsor']],
+        msg: 'Invalid role. Must be one of: super_admin, principal, admin, teacher, student, parent, staff, sponsor',
       },
     },
   },
@@ -107,6 +107,24 @@ const User = sequelize.define('User', {
     allowNull: true,
     defaultValue: [],
     field: 'mfa_backup_codes',
+  },
+  mustChangePassword: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+    field: 'must_change_password',
+  },
+  failedLoginAttempts: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+    field: 'failed_login_attempts',
+  },
+  lockedUntil: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
+    field: 'locked_until',
   },
 }, {
   tableName: 'users',
@@ -162,9 +180,17 @@ User.prototype.toJSON = function() {
 
 /**
  * Instance method to check if MFA is required for user role
+ * MFA is MANDATORY for super_admin and principal roles
+ * For other roles, MFA is optional based on mfaEnabled flag
  */
 User.prototype.requiresMFA = function() {
-  // Check if MFA is explicitly enabled for this user
+  // Super Admin and Principal MUST use MFA - highest security requirement
+  const mandatoryMFARoles = ['super_admin', 'principal'];
+  if (mandatoryMFARoles.includes(this.role)) {
+    return true;
+  }
+  
+  // For other roles, check if MFA is explicitly enabled for this user
   return this.mfaEnabled === true;
 };
 

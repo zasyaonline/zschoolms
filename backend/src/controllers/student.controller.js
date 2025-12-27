@@ -79,6 +79,7 @@ export const createStudent = async (req, res) => {
 
 /**
  * Get list of students with pagination and filtering
+ * Note: Sponsor data is hidden from teachers for privacy
  */
 export const getStudents = async (req, res) => {
   try {
@@ -100,6 +101,10 @@ export const getStudents = async (req, res) => {
       return errorResponse(res, 'Maximum limit is 100', 400);
     }
 
+    // Teachers should not be able to filter by sponsor
+    const userRole = req.user?.role;
+    const isTeacher = userRole === 'teacher';
+    
     const result = await studentService.getStudents({
       page,
       limit,
@@ -108,10 +113,18 @@ export const getStudents = async (req, res) => {
       isActive: isActive !== undefined ? isActive === 'true' : undefined,
       search,
       parentId,
-      sponsorId,
+      sponsorId: isTeacher ? undefined : sponsorId, // Teachers can't filter by sponsor
       sortBy,
       sortOrder,
     });
+
+    // Remove sponsor data from response for teachers
+    if (isTeacher && result.students) {
+      result.students = result.students.map(student => {
+        const { sponsor, sponsorId, sponsor_id, ...studentWithoutSponsor } = student;
+        return studentWithoutSponsor;
+      });
+    }
 
     successResponse(res, result);
   } catch (error) {
@@ -122,15 +135,23 @@ export const getStudents = async (req, res) => {
 
 /**
  * Get student by ID
+ * Note: Sponsor data is hidden from teachers for privacy
  */
 export const getStudentById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const student = await studentService.getStudentById(id);
+    let student = await studentService.getStudentById(id);
 
     if (!student) {
       return errorResponse(res, 'Student not found', 404);
+    }
+
+    // Remove sponsor data for teachers
+    const userRole = req.user?.role;
+    if (userRole === 'teacher') {
+      const { sponsor, sponsorId, sponsor_id, ...studentWithoutSponsor } = student;
+      student = studentWithoutSponsor;
     }
 
     successResponse(res, { student });
@@ -142,15 +163,23 @@ export const getStudentById = async (req, res) => {
 
 /**
  * Get student by enrollment number
+ * Note: Sponsor data is hidden from teachers for privacy
  */
 export const getStudentByEnrollment = async (req, res) => {
   try {
     const { enrollmentNumber } = req.params;
 
-    const student = await studentService.getStudentByEnrollment(enrollmentNumber);
+    let student = await studentService.getStudentByEnrollment(enrollmentNumber);
 
     if (!student) {
       return errorResponse(res, 'Student not found', 404);
+    }
+
+    // Remove sponsor data for teachers
+    const userRole = req.user?.role;
+    if (userRole === 'teacher') {
+      const { sponsor, sponsorId, sponsor_id, ...studentWithoutSponsor } = student;
+      student = studentWithoutSponsor;
     }
 
     successResponse(res, { student });
@@ -303,5 +332,52 @@ export const getStudentStats = async (req, res) => {
   } catch (error) {
     logger.error('Get student stats error:', error);
     errorResponse(res, 'Failed to fetch statistics', 500);
+  }
+};
+
+/**
+ * Upload student profile photo
+ */
+export const uploadStudentPhoto = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if file was uploaded
+    if (!req.file) {
+      return errorResponse(res, 'No photo file uploaded', 400);
+    }
+
+    // Get student to verify existence
+    const student = await studentService.getStudentById(id);
+    if (!student) {
+      return errorResponse(res, 'Student not found', 404);
+    }
+
+    // Construct the photo URL
+    const photoUrl = `/uploads/photos/${req.file.filename}`;
+
+    // Update student record with photo URL
+    await studentService.updateStudent(id, { photo: photoUrl }, req.user.id);
+
+    logger.info(`Photo uploaded for student ${id}: ${photoUrl}`);
+
+    successResponse(res, { 
+      photoUrl,
+      message: 'Photo uploaded successfully'
+    });
+  } catch (error) {
+    logger.error('Upload student photo error:', error);
+    
+    // Clean up uploaded file on error
+    if (req.file && req.file.path) {
+      const fs = await import('fs');
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (unlinkError) {
+        logger.error('Failed to clean up uploaded file:', unlinkError);
+      }
+    }
+    
+    errorResponse(res, error.message || 'Failed to upload photo', 500);
   }
 };

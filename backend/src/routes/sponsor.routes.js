@@ -119,7 +119,7 @@ router.post('/', authenticate, authorize('admin', 'super_admin'), sponsorControl
  *       200:
  *         description: Sponsors retrieved successfully
  */
-router.get('/', authenticate, authorize('admin', 'super_admin', 'teacher'), sponsorController.getSponsors);
+router.get('/', authenticate, authorize('admin', 'super_admin'), sponsorController.getSponsors);
 
 /**
  * @swagger
@@ -164,6 +164,111 @@ router.get('/stats', authenticate, authorize('admin', 'super_admin'), sponsorCon
 
 /**
  * @swagger
+ * /api/sponsors/summary:
+ *   get:
+ *     summary: Get sponsorship summary for admin dashboard
+ *     tags: [Sponsors]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Sponsorship summary retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sponsors:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     active:
+ *                       type: integer
+ *                     inactive:
+ *                       type: integer
+ *                 sponsorships:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     active:
+ *                       type: integer
+ *                     expired:
+ *                       type: integer
+ *                     terminated:
+ *                       type: integer
+ *                     expiringSoon:
+ *                       type: integer
+ */
+router.get('/summary', authenticate, authorize('admin', 'super_admin'), sponsorController.getSponsorshipSummary);
+
+/**
+ * @swagger
+ * /api/sponsors/available-students:
+ *   get:
+ *     summary: Get students available for sponsorship (not currently sponsored)
+ *     tags: [Sponsors]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: sponsorId
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Optional. If provided, excludes students already sponsored by this sponsor only
+ *       - in: query
+ *         name: grade
+ *         schema:
+ *           type: string
+ *         description: Filter by grade
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by student name
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *           maximum: 100
+ *     responses:
+ *       200:
+ *         description: Available students retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 students:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *                       currentGrade:
+ *                         type: string
+ *                       admissionNumber:
+ *                         type: string
+ *                 pagination:
+ *                   type: object
+ */
+router.get('/available-students', authenticate, authorize('admin', 'super_admin'), sponsorController.getAvailableStudents);
+
+/**
+ * @swagger
  * /api/sponsors/{id}:
  *   get:
  *     summary: Get sponsor by ID with mapped students
@@ -183,7 +288,7 @@ router.get('/stats', authenticate, authorize('admin', 'super_admin'), sponsorCon
  *       404:
  *         description: Sponsor not found
  */
-router.get('/:id', authenticate, authorize('admin', 'super_admin', 'teacher'), sponsorController.getSponsorById);
+router.get('/:id', authenticate, authorize('admin', 'super_admin'), sponsorController.getSponsorById);
 
 /**
  * @swagger
@@ -356,7 +461,7 @@ router.post('/:sponsorId/map-student', authenticate, authorize('admin', 'super_a
  *       404:
  *         description: Sponsor not found
  */
-router.get('/:sponsorId/students', authenticate, authorize('admin', 'super_admin', 'teacher'), sponsorController.getSponsorStudents);
+router.get('/:sponsorId/students', authenticate, authorize('admin', 'super_admin'), sponsorController.getSponsorStudents);
 
 /**
  * @swagger
@@ -435,5 +540,60 @@ router.put('/mapping/:mappingId', authenticate, authorize('admin', 'super_admin'
  *         description: Mapping not found
  */
 router.post('/mapping/:mappingId/terminate', authenticate, authorize('admin', 'super_admin'), sponsorController.terminateSponsorship);
+
+/**
+ * @swagger
+ * /api/sponsors/me/students:
+ *   get:
+ *     summary: Get students sponsored by the logged-in sponsor
+ *     description: Returns all students mapped to the currently authenticated sponsor user
+ *     tags: [Sponsors]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, expired, terminated]
+ *         description: Filter by sponsorship status
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         description: Sponsored students retrieved successfully
+ *       403:
+ *         description: User is not a sponsor
+ *       404:
+ *         description: Sponsor profile not found
+ */
+router.get('/me/students', authenticate, authorize('sponsor'), sponsorController.getMySponsoredStudents);
+
+/**
+ * @swagger
+ * /api/sponsors/me/dashboard:
+ *   get:
+ *     summary: Get sponsor dashboard data
+ *     description: Returns dashboard metrics for the currently authenticated sponsor
+ *     tags: [Sponsors]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dashboard data retrieved successfully
+ *       403:
+ *         description: User is not a sponsor
+ *       404:
+ *         description: Sponsor profile not found
+ */
+router.get('/me/dashboard', authenticate, authorize('sponsor'), sponsorController.getSponsorDashboard);
 
 export default router;

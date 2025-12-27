@@ -1,4 +1,5 @@
 import * as reportCardService from '../services/reportcard.service.js';
+import { User } from '../models/index.js';
 import logger from '../utils/logger.js';
 
 /**
@@ -47,10 +48,12 @@ export const generateReportCard = async (req, res) => {
 /**
  * Sign report card (principal/admin only)
  * POST /api/report-cards/:id/sign
+ * Requires password confirmation for second-factor authentication
  */
 export const signReportCard = async (req, res) => {
   try {
     const { id } = req.params;
+    const { password } = req.body;
     const principalId = req.user.id;
 
     if (!id) {
@@ -60,7 +63,37 @@ export const signReportCard = async (req, res) => {
       });
     }
 
-    const reportCard = await reportCardService.signReportCard(id, principalId);
+    // Second-factor authentication: require password confirmation
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password confirmation is required to sign report cards',
+        requiresConfirmation: true
+      });
+    }
+
+    // Verify password
+    const user = await User.findByPk(principalId);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      logger.warn(`Failed password confirmation for report card signing by user ${principalId}`);
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid password. Please enter your correct password to authorize signing.'
+      });
+    }
+
+    // Get IP address for audit
+    const ipAddress = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || req.connection?.remoteAddress;
+
+    const reportCard = await reportCardService.signReportCard(id, principalId, { ipAddress });
 
     return res.status(200).json({
       success: true,
@@ -301,6 +334,184 @@ export const getAllReportCards = async (req, res) => {
   }
 };
 
+/**
+ * Get classes ready for signature
+ * GET /api/report-cards/ready-for-signature
+ */
+export const getClassesReadyForSignature = async (req, res) => {
+  try {
+    const { academicYearId, coursePartId } = req.query;
+
+    if (!academicYearId) {
+      return res.status(400).json({
+        success: false,
+        error: 'academicYearId is required'
+      });
+    }
+
+    const result = await reportCardService.getClassesReadyForSignature(
+      academicYearId,
+      coursePartId || null
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Classes ready for signature retrieved',
+      data: result
+    });
+
+  } catch (error) {
+    logger.error('Error in getClassesReadyForSignature controller:', error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to get classes ready for signature'
+    });
+  }
+};
+
+/**
+ * Get signature queue summary for principal dashboard
+ * GET /api/report-cards/signature-queue
+ */
+export const getSignatureQueueSummary = async (req, res) => {
+  try {
+    const { academicYearId } = req.query;
+
+    if (!academicYearId) {
+      return res.status(400).json({
+        success: false,
+        error: 'academicYearId is required'
+      });
+    }
+
+    const result = await reportCardService.getSignatureQueueSummary(academicYearId);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Signature queue summary retrieved',
+      data: result
+    });
+
+  } catch (error) {
+    logger.error('Error in getSignatureQueueSummary controller:', error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to get signature queue summary'
+    });
+  }
+};
+
+/**
+ * Batch generate report cards for a class section
+ * POST /api/report-cards/batch/generate
+ */
+export const batchGenerateReportCards = async (req, res) => {
+  try {
+    const { classSectionId, academicYearId } = req.body;
+    const generatedBy = req.user.id;
+
+    if (!classSectionId || !academicYearId) {
+      return res.status(400).json({
+        success: false,
+        error: 'classSectionId and academicYearId are required'
+      });
+    }
+
+    const result = await reportCardService.batchGenerateReportCards(
+      classSectionId,
+      academicYearId,
+      generatedBy
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `Batch generation completed: ${result.successful}/${result.total} report cards generated`,
+      data: result
+    });
+
+  } catch (error) {
+    logger.error('Error in batchGenerateReportCards controller:', error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to batch generate report cards'
+    });
+  }
+};
+
+/**
+ * Batch sign report cards for a class section
+ * POST /api/report-cards/batch/sign
+ * Requires password confirmation
+ */
+export const batchSignReportCards = async (req, res) => {
+  try {
+    const { classSectionId, academicYearId, password } = req.body;
+    const principalId = req.user.id;
+
+    if (!classSectionId || !academicYearId) {
+      return res.status(400).json({
+        success: false,
+        error: 'classSectionId and academicYearId are required'
+      });
+    }
+
+    // Second-factor authentication: require password confirmation
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password confirmation is required to sign report cards',
+        requiresConfirmation: true
+      });
+    }
+
+    // Verify password
+    const user = await User.findByPk(principalId);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      logger.warn(`Failed password confirmation for batch report card signing by user ${principalId}`);
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid password. Please enter your correct password to authorize signing.'
+      });
+    }
+
+    // Get IP address for audit
+    const ipAddress = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || req.connection?.remoteAddress;
+
+    const result = await reportCardService.batchSignReportCards(
+      classSectionId,
+      academicYearId,
+      principalId,
+      { ipAddress }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `Batch signing completed: ${result.successful}/${result.total} report cards signed`,
+      data: result
+    });
+
+  } catch (error) {
+    logger.error('Error in batchSignReportCards controller:', error);
+    
+    let statusCode = 500;
+    if (error.message.includes('Only principals')) statusCode = 403;
+    if (error.message.includes('No pending') || error.message.includes('No students')) statusCode = 404;
+    
+    return res.status(statusCode).json({
+      success: false,
+      error: error.message || 'Failed to batch sign report cards'
+    });
+  }
+};
+
 export default {
   generateReportCard,
   signReportCard,
@@ -308,5 +519,9 @@ export default {
   getStudentReportCards,
   getReportCardById,
   deleteReportCard,
-  getAllReportCards
+  getAllReportCards,
+  getClassesReadyForSignature,
+  getSignatureQueueSummary,
+  batchGenerateReportCards,
+  batchSignReportCards
 };

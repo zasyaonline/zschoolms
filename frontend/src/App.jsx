@@ -29,6 +29,9 @@ const MyProfile = lazy(() => import('./pages/StudentFlow/MyProfile'));
 const MyAttendance = lazy(() => import('./pages/StudentFlow/MyAttendance'));
 const MyMarksHistory = lazy(() => import('./pages/StudentFlow/MyMarksHistory'));
 
+// Sponsor Flow
+const SponsorDashboard = lazy(() => import('./pages/SponsorFlow/SponsorDashboard'));
+
 // Auth helper - check if user is authenticated
 const isAuthenticated = () => {
   const token = localStorage.getItem('accessToken');
@@ -266,6 +269,22 @@ function App() {
             <ErrorBoundary>
               <Suspense fallback={<LoadingFallback />}>
                 <MyMarksHistory />
+              </Suspense>
+            </ErrorBoundary>
+          } />
+          
+          {/* Sponsor Flow */}
+          <Route path="sponsor/dashboard" element={
+            <ErrorBoundary>
+              <Suspense fallback={<LoadingFallback />}>
+                <SponsorDashboard />
+              </Suspense>
+            </ErrorBoundary>
+          } />
+          <Route path="sponsor/students" element={
+            <ErrorBoundary>
+              <Suspense fallback={<LoadingFallback />}>
+                <SponsorDashboard />
               </Suspense>
             </ErrorBoundary>
           } />

@@ -3,12 +3,17 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import { connectDB } from './config/database.js';
 import { swaggerSpec } from './config/swagger.js';
 
 // Load environment variables
 dotenv.config();
+
+// Import scheduled jobs
+import { startRenewalReminderJob } from './jobs/renewal-reminder.job.js';
+import { startEmailQueueJob } from './jobs/email-queue.job.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -24,6 +29,9 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' })); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Parse URL-encoded bodies
 app.use(morgan('dev')); // Request logging
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Debug middleware - log all requests
 app.use((req, res, next) => {
@@ -71,6 +79,7 @@ app.get('/api', (req, res) => {
       analytics: '/api/analytics',
       schools: '/api/schools',
       grades: '/api/grades',
+      batchJobs: '/api/batch-jobs',
     },
   });
 });
@@ -88,6 +97,14 @@ import reportCardRoutes from './routes/reportcard.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
 import schoolRoutes from './routes/school.routes.js';
 import gradingSchemeRoutes from './routes/gradingscheme.routes.js';
+import superAdminRoutes from './routes/superadmin.routes.js';
+import academicYearRoutes from './routes/academicyear.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
+import teacherRoutes from './routes/teacher.routes.js';
+import batchJobRoutes from './routes/batchjob.routes.js';
+import distributionRoutes from './routes/distribution.routes.js';
+import paymentRoutes from './routes/payment.routes.js';
+import studentPortalRoutes from './routes/studentPortal.routes.js';
 
 console.log('🔌 Mounting routes...');
 app.use('/api/auth', authRoutes);
@@ -101,6 +118,14 @@ app.use('/api/report-cards', reportCardRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/schools', schoolRoutes);
 app.use('/api/grading-schemes', gradingSchemeRoutes);
+app.use('/api/super-admin', superAdminRoutes);
+app.use('/api/academic-years', academicYearRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/teachers', teacherRoutes);
+app.use('/api/batch-jobs', batchJobRoutes);
+app.use('/api/distribution', distributionRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/student-portal', studentPortalRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -141,6 +166,18 @@ const server = app.listen(PORT, () => {
   console.log(`🔗 Frontend: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
   console.log(`💾 Database: PostgreSQL`);
   console.log('=================================');
+  
+  // Start scheduled jobs
+  if (process.env.ENABLE_CRON_JOBS !== 'false') {
+    try {
+      startRenewalReminderJob();
+      startEmailQueueJob();
+      console.log('📅 Scheduled jobs started');
+    } catch (error) {
+      console.error('⚠️ Failed to start scheduled jobs:', error.message);
+    }
+  }
+  
   console.log('✅ Server is NOW LISTENING and ready to accept requests');
 });
 

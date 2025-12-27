@@ -1,5 +1,7 @@
 import express from 'express';
 import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 import {
   createStudent,
   getStudents,
@@ -11,13 +13,20 @@ import {
   mapSponsor,
   bulkImportStudents,
   getStudentStats,
+  uploadStudentPhoto,
 } from '../controllers/student.controller.js';
 import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(process.cwd(), 'uploads', 'photos');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // Configure multer for CSV file upload
-const upload = multer({
+const csvUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
@@ -25,6 +34,31 @@ const upload = multer({
       cb(null, true);
     } else {
       cb(new Error('Only CSV files are allowed'));
+    }
+  },
+});
+
+// Configure multer for photo uploads
+const photoStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `student-${req.params.id}-${uniqueSuffix}${ext}`);
+  }
+});
+
+const photoUpload = multer({
+  storage: photoStorage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit for photos
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files (JPEG, PNG, GIF, WebP) are allowed'));
     }
   },
 });
@@ -293,6 +327,61 @@ router.post('/:id/map-sponsor', authenticate, authorizeRoles('admin'), mapSponso
 
 /**
  * @swagger
+ * /api/students/{id}/photo:
+ *   post:
+ *     summary: Upload student profile photo
+ *     tags: [Students]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - photo
+ *             properties:
+ *               photo:
+ *                 type: string
+ *                 format: binary
+ *                 description: Student photo (JPEG, PNG, GIF, WebP - max 2MB)
+ *     responses:
+ *       200:
+ *         description: Photo uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     photoUrl:
+ *                       type: string
+ *                       example: /uploads/photos/student-uuid-123456789.jpg
+ *       400:
+ *         description: Invalid file or missing photo
+ *       404:
+ *         description: Student not found
+ */
+router.post(
+  '/:id/photo',
+  authenticate,
+  authorizeRoles('admin', 'teacher'),
+  photoUpload.single('photo'),
+  uploadStudentPhoto
+);
+
+/**
+ * @swagger
  * /api/students/import:
  *   post:
  *     summary: Bulk import students from CSV
@@ -315,7 +404,7 @@ router.post(
   '/import',
   authenticate,
   authorizeRoles('admin'),
-  upload.single('file'),
+  csvUpload.single('file'),
   bulkImportStudents
 );
 

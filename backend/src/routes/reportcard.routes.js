@@ -113,6 +113,129 @@ const router = express.Router();
 
 /**
  * @swagger
+ * /api/report-cards/ready-for-signature:
+ *   get:
+ *     summary: Get classes ready for report card signature
+ *     description: Returns classes where all subjects have approved marksheets
+ *     tags: [Report Cards]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: academicYearId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Academic Year UUID
+ *       - in: query
+ *         name: coursePartId
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Course Part (term) UUID (optional)
+ *     responses:
+ *       200:
+ *         description: Classes ready for signature retrieved
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     classes:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           classSectionId:
+ *                             type: string
+ *                           className:
+ *                             type: string
+ *                           isReadyForSignature:
+ *                             type: boolean
+ *                           completionPercentage:
+ *                             type: integer
+ *                           missingSubjects:
+ *                             type: array
+ *                     summary:
+ *                       type: object
+ *                       properties:
+ *                         totalClasses:
+ *                           type: integer
+ *                         readyForSignature:
+ *                           type: integer
+ *       400:
+ *         description: Missing academicYearId
+ *       500:
+ *         description: Server error
+ */
+router.get('/ready-for-signature',
+  authenticate,
+  authorize(['admin', 'super_admin', 'principal']),
+  reportCardController.getClassesReadyForSignature
+);
+
+/**
+ * @swagger
+ * /api/report-cards/signature-queue:
+ *   get:
+ *     summary: Get signature queue summary for principal dashboard
+ *     description: Returns report card counts and classes ready for signature
+ *     tags: [Report Cards]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: academicYearId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Academic Year UUID
+ *     responses:
+ *       200:
+ *         description: Signature queue summary retrieved
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     reportCards:
+ *                       type: object
+ *                       properties:
+ *                         pendingSignature:
+ *                           type: integer
+ *                         signed:
+ *                           type: integer
+ *                         distributed:
+ *                           type: integer
+ *                     classes:
+ *                       type: object
+ *                     readyClasses:
+ *                       type: array
+ *       400:
+ *         description: Missing academicYearId
+ *       500:
+ *         description: Server error
+ */
+router.get('/signature-queue',
+  authenticate,
+  authorize(['admin', 'super_admin', 'principal']),
+  reportCardController.getSignatureQueueSummary
+);
+
+/**
+ * @swagger
  * /api/report-cards/generate:
  *   post:
  *     summary: Generate report card for a student
@@ -175,8 +298,11 @@ router.post('/generate',
  * @swagger
  * /api/report-cards/{id}/sign:
  *   post:
- *     summary: Sign report card (Principal/Admin only)
- *     description: Updates report card with principal signature and changes status to Signed
+ *     summary: Sign report card (Principal/Admin only) - Requires password confirmation
+ *     description: |
+ *       Updates report card with principal's digital signature and changes status to Signed.
+ *       **Security**: This action requires password confirmation as a second-factor authentication.
+ *       The action is logged with IP address and cannot be undone.
  *     tags: [Report Cards]
  *     security:
  *       - bearerAuth: []
@@ -189,6 +315,20 @@ router.post('/generate',
  *           format: uuid
  *         description: Report card UUID
  *         example: 323e4567-e89b-12d3-a456-426614174000
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - password
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: User's login password for second-factor authentication
+ *                 example: "MySecurePassword123"
  *     responses:
  *       200:
  *         description: Report card signed successfully
@@ -206,7 +346,23 @@ router.post('/generate',
  *                 data:
  *                   $ref: '#/components/schemas/ReportCard'
  *       400:
- *         description: Invalid report card ID
+ *         description: Password confirmation required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   example: Password confirmation is required to sign report cards
+ *                 requiresConfirmation:
+ *                   type: boolean
+ *                   example: true
+ *       401:
+ *         description: Invalid password
  *       403:
  *         description: Unauthorized - Only principals and admins can sign
  *       404:
@@ -562,6 +718,141 @@ router.get('/',
   authenticate,
   authorize(['admin', 'super_admin', 'principal']),
   reportCardController.getAllReportCards
+);
+
+/**
+ * @swagger
+ * /api/report-cards/batch/generate:
+ *   post:
+ *     summary: Batch generate report cards for a class section
+ *     description: Generates report cards for all students in a class section
+ *     tags: [Report Cards]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - classSectionId
+ *               - academicYearId
+ *             properties:
+ *               classSectionId:
+ *                 type: string
+ *                 format: uuid
+ *                 description: Class Section UUID
+ *               academicYearId:
+ *                 type: string
+ *                 format: uuid
+ *                 description: Academic Year UUID
+ *     responses:
+ *       200:
+ *         description: Batch generation completed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     successful:
+ *                       type: integer
+ *                     failed:
+ *                       type: integer
+ *                     skipped:
+ *                       type: integer
+ *                     errors:
+ *                       type: array
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Server error
+ */
+router.post('/batch/generate',
+  authenticate,
+  authorize(['admin', 'super_admin', 'principal']),
+  reportCardController.batchGenerateReportCards
+);
+
+/**
+ * @swagger
+ * /api/report-cards/batch/sign:
+ *   post:
+ *     summary: Batch sign report cards for a class section
+ *     description: |
+ *       Signs all pending report cards for a class section.
+ *       **Security**: This action requires password confirmation as a second-factor authentication.
+ *     tags: [Report Cards]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - classSectionId
+ *               - academicYearId
+ *               - password
+ *             properties:
+ *               classSectionId:
+ *                 type: string
+ *                 format: uuid
+ *                 description: Class Section UUID
+ *               academicYearId:
+ *                 type: string
+ *                 format: uuid
+ *                 description: Academic Year UUID
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: User's login password for second-factor authentication
+ *     responses:
+ *       200:
+ *         description: Batch signing completed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     successful:
+ *                       type: integer
+ *                     failed:
+ *                       type: integer
+ *                     signedReportCards:
+ *                       type: array
+ *       400:
+ *         description: Missing required fields or password confirmation required
+ *       401:
+ *         description: Invalid password
+ *       403:
+ *         description: Only principals and admins can sign
+ *       500:
+ *         description: Server error
+ */
+router.post('/batch/sign',
+  authenticate,
+  authorize(['admin', 'super_admin', 'principal']),
+  reportCardController.batchSignReportCards
 );
 
 export default router;

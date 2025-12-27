@@ -83,6 +83,18 @@ const StudentSponsorMapping = sequelize.define('StudentSponsorMapping', {
       key: 'id',
     },
   },
+  // Renewal reminder tracking fields
+  lastReminderSent: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'last_reminder_sent',
+  },
+  reminderCount: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+    field: 'reminder_count',
+  },
 }, {
   tableName: 'student_sponsor_mapping',
   timestamps: true,

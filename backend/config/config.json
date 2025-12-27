@@ -1,0 +1,26 @@
+{
+  "development": {
+    "username": "zschool_user",
+    "password": "P@ssw0rd",
+    "database": "zschool_db",
+    "host": "63.250.52.24",
+    "port": 5432,
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "zschool_user",
+    "password": "P@ssw0rd",
+    "database": "zschool_db_test",
+    "host": "63.250.52.24",
+    "port": 5432,
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "zschool_user",
+    "password": "P@ssw0rd",
+    "database": "zschool_db",
+    "host": "63.250.52.24",
+    "port": 5432,
+    "dialect": "postgres"
+  }
+}

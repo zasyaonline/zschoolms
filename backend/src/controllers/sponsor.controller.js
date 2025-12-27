@@ -20,6 +20,7 @@ export const createSponsor = async (req, res) => {
       city,
       state,
       postalCode,
+      sendWelcomeEmail,
     } = req.body;
 
     // Validation
@@ -42,9 +43,16 @@ export const createSponsor = async (req, res) => {
       postalCode,
     };
 
-    const sponsor = await sponsorService.createSponsor(sponsorData, req.user.id);
+    const options = {
+      sendWelcomeEmail: sendWelcomeEmail !== false, // Default to true
+    };
 
-    return successResponse(res, 'Sponsor created successfully', sponsor, 201);
+    const result = await sponsorService.createSponsor(sponsorData, req.user.id, options);
+
+    return successResponse(res, 'Sponsor created successfully', {
+      sponsor: result.sponsor,
+      emailSent: result.emailSent,
+    }, 201);
   } catch (error) {
     logger.error('Error in createSponsor controller:', error);
     if (error.name === 'SequelizeUniqueConstraintError') {
@@ -156,27 +164,35 @@ export const deleteSponsor = async (req, res) => {
 export const mapSponsorToStudent = async (req, res) => {
   try {
     const { sponsorId } = req.params;
-    const { studentId, sponsorshipType, startDate, endDate, amount, currency, notes } = req.body;
+    const { studentId, sponsorshipType, startDate, endDate, amount, currency, notes, sendNotificationEmail } = req.body;
 
-    // Validation
-    if (!studentId || !sponsorshipType || !startDate) {
-      return errorResponse(res, 'studentId, sponsorshipType, and startDate are required', 400);
+    // Validation - startDate is now optional (defaults to today)
+    if (!studentId) {
+      return errorResponse(res, 'studentId is required', 400);
     }
 
     const mappingData = {
       studentId,
       sponsorId,
-      sponsorshipType,
-      startDate,
-      endDate,
+      sponsorshipType: sponsorshipType || 'full',
+      startDate, // Optional - defaults to today
+      endDate,   // Optional - defaults to startDate + 1 year
       amount,
       currency,
       notes,
     };
 
-    const mapping = await sponsorService.mapSponsorToStudent(mappingData, req.user.id);
+    const options = {
+      sendNotificationEmail: sendNotificationEmail !== false, // Default to true
+    };
 
-    return successResponse(res, 'Sponsor mapped to student successfully', mapping, 201);
+    const result = await sponsorService.mapSponsorToStudent(mappingData, req.user.id, options);
+
+    return successResponse(res, 'Sponsor mapped to student successfully', {
+      mapping: result.mapping,
+      emailSent: result.emailSent,
+      renewalDateAutoCalculated: !endDate,
+    }, 201);
   } catch (error) {
     logger.error('Error in mapSponsorToStudent controller:', error);
     if (error.message.includes('not found')) {
@@ -272,15 +288,75 @@ export const getSponsorStats = async (req, res) => {
   }
 };
 
-export default {
-  createSponsor,
-  getSponsors,
-  getSponsorById,
-  updateSponsor,
-  deleteSponsor,
-  mapSponsorToStudent,
-  getSponsorStudents,
-  updateSponsorshipMapping,
-  terminateSponsorship,
-  getSponsorStats,
+/**
+ * Get students sponsored by the logged-in sponsor
+ */
+export const getMySponsoredStudents = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { status, page = 1, limit = 10 } = req.query;
+
+    const result = await sponsorService.getSponsoredStudentsByUserId(userId, { status, page, limit });
+
+    return successResponse(res, 'Sponsored students retrieved successfully', result);
+  } catch (error) {
+    logger.error('Error in getMySponsoredStudents controller:', error);
+    return errorResponse(res, error.message || 'Failed to retrieve sponsored students', 500);
+  }
 };
+
+/**
+ * Get sponsor dashboard data for logged-in sponsor
+ */
+export const getSponsorDashboard = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const dashboardData = await sponsorService.getSponsorDashboardByUserId(userId);
+
+    return successResponse(res, 'Sponsor dashboard retrieved successfully', dashboardData);
+  } catch (error) {
+    logger.error('Error in getSponsorDashboard controller:', error);
+    return errorResponse(res, error.message || 'Failed to retrieve sponsor dashboard', 500);
+  }
+};
+
+/**
+ * Get students available for sponsorship
+ */
+export const getAvailableStudents = async (req, res) => {
+  try {
+    const { sponsorId, grade, search, page = 1, limit = 20 } = req.query;
+
+    const options = {
+      sponsorId,
+      grade,
+      search,
+      page: parseInt(page),
+      limit: Math.min(parseInt(limit) || 20, 100), // Cap at 100
+    };
+
+    const result = await sponsorService.getAvailableStudentsForSponsorship(options);
+
+    return successResponse(res, 'Available students retrieved successfully', result);
+  } catch (error) {
+    logger.error('Error in getAvailableStudents controller:', error);
+    return errorResponse(res, error.message || 'Failed to retrieve available students', 500);
+  }
+};
+
+/**
+ * Get sponsorship summary for admin dashboard
+ */
+export const getSponsorshipSummary = async (req, res) => {
+  try {
+    const summary = await sponsorService.getSponsorshipSummary();
+
+    return successResponse(res, 'Sponsorship summary retrieved successfully', summary);
+  } catch (error) {
+    logger.error('Error in getSponsorshipSummary controller:', error);
+    return errorResponse(res, error.message || 'Failed to retrieve sponsorship summary', 500);
+  }
+};
+
+// All functions are already exported via 'export const' declarations above

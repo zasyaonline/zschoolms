@@ -109,6 +109,115 @@ router.post('/entry',
 
 /**
  * @swagger
+ * /api/marks/draft:
+ *   post:
+ *     summary: Auto-save draft marks (for periodic auto-save)
+ *     tags: [Marks]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               marksheetId:
+ *                 type: string
+ *                 format: uuid
+ *                 description: Existing marksheet ID (if updating)
+ *               coursePartId:
+ *                 type: string
+ *                 format: uuid
+ *               academicYearId:
+ *                 type: string
+ *                 format: uuid
+ *               studentSubjectEnrollmentId:
+ *                 type: string
+ *                 format: uuid
+ *               subjectId:
+ *                 type: string
+ *                 format: uuid
+ *               schoolId:
+ *                 type: string
+ *                 format: uuid
+ *               marksObtained:
+ *                 type: number
+ *               maxMarks:
+ *                 type: number
+ *                 default: 100
+ *               remarks:
+ *                 type: string
+ *               marks:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     subjectId:
+ *                       type: string
+ *                       format: uuid
+ *                     marksObtained:
+ *                       type: number
+ *                     maxMarks:
+ *                       type: integer
+ *     responses:
+ *       200:
+ *         description: Draft saved successfully
+ *       400:
+ *         description: Validation error
+ *       403:
+ *         description: Cannot save - marksheet is locked
+ */
+router.post('/draft',
+  authenticate,
+  authorize(['teacher', 'admin', 'super_admin', 'principal']),
+  marksController.autoSaveDraft
+);
+
+/**
+ * @swagger
+ * /api/marks/validate:
+ *   post:
+ *     summary: Validate marks before submission
+ *     tags: [Marks]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               marksObtained:
+ *                 type: number
+ *               maxMarks:
+ *                 type: number
+ *                 default: 100
+ *               marks:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     subjectId:
+ *                       type: string
+ *                       format: uuid
+ *                     marksObtained:
+ *                       type: number
+ *                     maxMarks:
+ *                       type: integer
+ *     responses:
+ *       200:
+ *         description: Validation result
+ */
+router.post('/validate',
+  authenticate,
+  authorize(['teacher', 'admin', 'super_admin', 'principal']),
+  marksController.validateMarks
+);
+
+/**
+ * @swagger
  * /api/marks/pending:
  *   get:
  *     summary: Get pending marksheets for approval
@@ -266,6 +375,92 @@ router.get('/marksheets/:id',
   authenticate,
   authorize(['teacher', 'admin', 'super_admin', 'principal', 'student']),
   marksController.getMarksheetById
+);
+
+/**
+ * @swagger
+ * /api/marks/marksheets/{id}/statistics:
+ *   get:
+ *     summary: Get detailed marksheet statistics for principal review
+ *     description: Returns class average, highest/lowest scores, grade distribution, and anomaly detection
+ *     tags: [Marks]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Marksheet UUID
+ *     responses:
+ *       200:
+ *         description: Marksheet statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     marksheet:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         status:
+ *                           type: string
+ *                         subject:
+ *                           type: object
+ *                     statistics:
+ *                       type: object
+ *                       properties:
+ *                         totalStudents:
+ *                           type: integer
+ *                         classAverage:
+ *                           type: number
+ *                         highest:
+ *                           type: object
+ *                         lowest:
+ *                           type: object
+ *                         median:
+ *                           type: number
+ *                         passRate:
+ *                           type: number
+ *                         gradeDistribution:
+ *                           type: object
+ *                     anomalies:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           type:
+ *                             type: string
+ *                             enum: [zero_marks, perfect_score, high_failure_rate, outliers]
+ *                           severity:
+ *                             type: string
+ *                             enum: [info, warning, critical]
+ *                           message:
+ *                             type: string
+ *                     hasAnomalies:
+ *                       type: boolean
+ *                     criticalAnomalies:
+ *                       type: integer
+ *       404:
+ *         description: Marksheet not found
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+router.get('/marksheets/:id/statistics',
+  authenticate,
+  authorize(['admin', 'super_admin', 'principal']),
+  marksController.getMarksheetStatistics
 );
 
 /**

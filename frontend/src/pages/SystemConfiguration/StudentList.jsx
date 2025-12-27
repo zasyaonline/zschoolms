@@ -151,11 +151,6 @@ const StudentList = () => {
       }
     }
   };
-      // TODO: Add API call here
-      // await api.students.delete(id);
-      // After successful deletion, refresh the student list
-    }
-  };
 
   return (
     <div className="student-list">

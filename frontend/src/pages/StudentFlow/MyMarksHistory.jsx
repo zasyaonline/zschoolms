@@ -215,10 +215,6 @@ const MyMarksHistory = () => {
       </div>
     );
   }
-    if (trend === 'up') return '📈';
-    if (trend === 'down') return '📉';
-    return '➡️';
-  };
 
   return (
     <div className="my-marks">

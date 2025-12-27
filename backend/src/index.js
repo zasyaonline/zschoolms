@@ -11,12 +11,30 @@ import { swaggerSpec } from './config/swagger.js';
 // Load environment variables
 dotenv.config();
 
+// Import Sentry configuration
+import { 
+  initSentry, 
+  sentryRequestHandler, 
+  sentryTracingHandler, 
+  sentryErrorHandler,
+  captureException 
+} from './config/sentry.js';
+
 // Import scheduled jobs
 import { startRenewalReminderJob } from './jobs/renewal-reminder.job.js';
 import { startEmailQueueJob } from './jobs/email-queue.job.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Initialize Sentry (must be before other middleware)
+initSentry(app);
+
+// Sentry request handler (must be first)
+app.use(sentryRequestHandler());
+
+// Sentry tracing handler
+app.use(sentryTracingHandler());
 
 // Middleware
 app.use(helmet()); // Security headers
@@ -127,9 +145,19 @@ app.use('/api/distribution', distributionRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/student-portal', studentPortalRoutes);
 
+// Sentry error handler (must be before other error handlers)
+app.use(sentryErrorHandler());
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err.stack);
+  
+  // Capture exception to Sentry with context
+  captureException(err, {
+    user: req.user ? { id: req.user.id, email: req.user.email, role: req.user.role } : null,
+    tags: { path: req.path, method: req.method },
+    extra: { query: req.query, body: req.body }
+  });
   
   const statusCode = err.statusCode || err.status || 500;
   const message = err.message || 'Internal Server Error';
